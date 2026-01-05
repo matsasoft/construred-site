@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+:root {
+    /* ===================
+       Construred Brand Colors
+       =================== */
+    --color-primary: #f5b932;
+    --color-primary-light: #fcd270;
+    --color-primary-dark: #d99b1a;
+
+    --color-secondary: #2d3e7c;
+    --color-secondary-dark: #1e2a54;
+    --color-secondary-light: #4a5a9a;
+
+    --color-accent: #a32035;
+    --color-accent-light: #c4384d;
+    --color-accent-dark: #7a1828;
+}
