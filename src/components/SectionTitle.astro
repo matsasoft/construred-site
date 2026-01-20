@@ -1,0 +1,49 @@
+---
+interface Props {
+    title: string;
+    subtitle?: string;
+    align?: 'left' | 'center' | 'right';
+    dark?: boolean;
+}
+
+const {
+    title,
+    subtitle,
+    align = 'center',
+    dark = false
+} = Astro.props;
+
+const alignments = {
+    left: 'text-left',
+    center: 'text-center',
+    right: 'text-right'
+};
+---
+
+<div class:list={["mb-12", alignments[align]]}>
+    <h2 class:list={[
+        "text-4xl md:text-5xl lg:text-6xl mb-4 relative inline-block",
+        dark ? "text-white" : "text-secondary"
+    ]}>
+        {title}
+        <span class="absolute -bottom-2 left-0 w-full h-1 bg-primary transform origin-left scale-x-0 transition-transform duration-500 group-hover:scale-x-100"></span>
+    </h2>
+    {subtitle && (
+        <p class:list={[
+            "text-lg md:text-xl max-w-2xl font-body",
+            align === 'center' && "mx-auto",
+            dark ? "text-neutral-300" : "text-neutral-600"
+        ]}>
+            {subtitle}
+        </p>
+    )}
+    <div class:list={[
+        "mt-4 flex items-center gap-2",
+        align === 'center' && "justify-center",
+        align === 'right' && "justify-end"
+    ]}>
+        <span class="w-12 h-1 bg-primary"></span>
+        <span class="w-3 h-3 bg-secondary rotate-45"></span>
+        <span class="w-12 h-1 bg-primary"></span>
+    </div>
+</div>

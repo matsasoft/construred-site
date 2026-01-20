@@ -1,0 +1,19 @@
+Create a new data table component, create all the ts files required in @src/componets/nxt-data-table folder. Use TanStack Table, the shadcn @src/components/ui/table.tsx component and base-ui components for this data table component, do not use any class in @src/components/data-table/, I want a new implementation.
+This new data table must:
+- be generic to store any kind of data so it can be reusable
+- support row selection with checkboxes and a column to add actions on a row.
+- Columns must be customizable with options like width, alignment, and visibility, format, and sorting
+- Columns must be sortable locally or via remote server
+- Filter by any column or several columns either locally or via remote server
+- Pagination locally or via remote server
+- Support server-side data fetching and rendering
+- Support server-side data filtering and sorting
+- Support server-side data pagination
+- Change the params for the filters and the page params in the url page. Use https://nuqs.dev/ to access search params so the table is in sync with the url params.
+
+The data table must be responsive and accessible. It should also support keyboard navigation and screen reader compatibility.
+Also it should be generic to store any kind of data so it can be reusable.
+
+At the end check the types and no error are found.
+
+Analyze these requirements and implement the data table component accordingly, interview me if you have any questions.

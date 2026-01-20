@@ -1,0 +1,72 @@
+---
+interface Props {
+    variant?: 'primary' | 'secondary' | 'accent' | 'outline';
+    size?: 'sm' | 'md' | 'lg';
+    href?: string;
+    class?: string;
+    type?: 'button' | 'submit' | 'reset';
+}
+
+const {
+    variant = 'primary',
+    size = 'md',
+    href,
+    class: className = '',
+    type = 'button'
+} = Astro.props;
+
+const baseStyles = `
+    inline-flex items-center justify-center
+    font-display font-normal tracking-wider uppercase
+    transition-all duration-300 ease-out
+    border-2 cursor-pointer
+    relative overflow-hidden
+    transform hover:-translate-y-0.5 active:translate-y-0
+`;
+
+const variants = {
+    primary: `
+        bg-primary text-secondary-dark border-primary
+        hover:bg-primary-dark hover:border-primary-dark
+        shadow-industrial-sm hover:shadow-industrial
+    `,
+    secondary: `
+        bg-secondary text-white border-secondary
+        hover:bg-secondary-dark hover:border-secondary-dark
+        shadow-[2px_2px_0_0_var(--color-primary)] hover:shadow-[4px_4px_0_0_var(--color-primary)]
+    `,
+    accent: `
+        bg-accent text-white border-accent
+        hover:bg-accent-dark hover:border-accent-dark
+        shadow-[2px_2px_0_0_var(--color-secondary)] hover:shadow-[4px_4px_0_0_var(--color-secondary)]
+    `,
+    outline: `
+        bg-transparent text-secondary border-secondary
+        hover:bg-secondary hover:text-white
+    `
+};
+
+const sizes = {
+    sm: 'px-4 py-2 text-sm',
+    md: 'px-6 py-3 text-base',
+    lg: 'px-8 py-4 text-lg'
+};
+
+const Element = href ? 'a' : 'button';
+---
+
+{href ? (
+    <a
+        href={href}
+        class:list={[baseStyles, variants[variant], sizes[size], className]}
+    >
+        <slot />
+    </a>
+) : (
+    <button
+        type={type}
+        class:list={[baseStyles, variants[variant], sizes[size], className]}
+    >
+        <slot />
+    </button>
+)}

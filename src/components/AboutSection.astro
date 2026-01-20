@@ -1,0 +1,110 @@
+---
+import SectionTitle from './SectionTitle.astro';
+
+const cards = [
+    {
+        icon: `<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>`,
+        title: 'Quiénes Somos',
+        description: 'En Construred, encuentras todo el material eléctrico, de construcción y plomería para tus proyectos. En nuestras ferreterías encontrarás todo el material de construcción que necesitas para tus proyectos de remodelación y reparación, y siempre contarás con la mejor atención personalizada.',
+        accent: 'primary'
+    },
+    {
+        icon: `<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>`,
+        title: 'Nuestra Misión',
+        description: 'Atender y solucionar en forma integral y efectiva las necesidades de construcción del público en general, ferreteros, transformistas, industria de la construcción y Gobierno, contando con una amplia gama de productos, una infraestructura funcional y moderna con colaboradores profesionales, para garantizar su plena satisfacción.',
+        accent: 'secondary'
+    },
+    {
+        icon: `<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>`,
+        title: 'Política de Calidad',
+        description: 'Atención personalizada a nuestros clientes ayudándoles a definir sus necesidades, ofreciéndoles oportunamente la mejor opción. En ConstruRed estamos comprometidos con nuestros clientes, por lo que siempre serás atendido con amabilidad, eficiencia y rapidez.',
+        accent: 'accent'
+    }
+];
+
+const accentColors = {
+    primary: 'bg-primary text-secondary-dark',
+    secondary: 'bg-secondary text-white',
+    accent: 'bg-accent text-white'
+};
+
+const borderColors = {
+    primary: 'border-primary',
+    secondary: 'border-secondary',
+    accent: 'border-accent'
+};
+---
+
+<section id="nosotros" class="py-20 lg:py-32 bg-neutral-50 relative overflow-hidden">
+    <!-- Decorative Elements -->
+    <div class="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+    <div class="absolute bottom-0 left-0 w-64 h-64 bg-secondary/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+
+    <!-- Industrial Pattern Accent -->
+    <div class="absolute top-20 left-0 w-2 h-40 bg-primary"></div>
+    <div class="absolute bottom-20 right-0 w-2 h-40 bg-secondary"></div>
+
+    <div class="container mx-auto px-4 lg:px-8 relative">
+        <SectionTitle
+            title="Nosotros"
+            subtitle="Conoce más sobre Construred y nuestra pasión por servir"
+        />
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16">
+            {cards.map((card, index) => (
+                <article
+                    class={`group relative bg-white p-8 transition-all duration-500 hover:-translate-y-2 border-b-4 ${borderColors[card.accent as keyof typeof borderColors]}`}
+                    style={`animation-delay: ${index * 150}ms`}
+                >
+                    <!-- Icon Container -->
+                    <div class={`w-20 h-20 flex items-center justify-center mb-6 ${accentColors[card.accent as keyof typeof accentColors]} transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
+                        <Fragment set:html={card.icon} />
+                    </div>
+
+                    <!-- Content -->
+                    <h3 class="text-2xl lg:text-3xl font-display text-secondary mb-4 tracking-wide">
+                        {card.title}
+                    </h3>
+                    <p class="text-neutral-600 leading-relaxed">
+                        {card.description}
+                    </p>
+
+                    <!-- Corner Accent -->
+                    <div class={`absolute top-0 right-0 w-16 h-16 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${accentColors[card.accent as keyof typeof accentColors]}`} style="clip-path: polygon(100% 0, 100% 100%, 0 0)"></div>
+
+                    <!-- Industrial Shadow Effect -->
+                    <div class="absolute -bottom-2 -right-2 w-full h-full bg-neutral-200 -z-10 transition-all duration-500 group-hover:-bottom-3 group-hover:-right-3"></div>
+                </article>
+            ))}
+        </div>
+
+        <!-- Stats Section -->
+        <div class="mt-20 grid grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="text-center group">
+                <div class="text-5xl lg:text-6xl font-display text-primary mb-2 group-hover:scale-110 transition-transform duration-300">25+</div>
+                <div class="text-neutral-600 font-body">Años de experiencia</div>
+            </div>
+            <div class="text-center group">
+                <div class="text-5xl lg:text-6xl font-display text-secondary mb-2 group-hover:scale-110 transition-transform duration-300">50+</div>
+                <div class="text-neutral-600 font-body">Sucursales</div>
+            </div>
+            <div class="text-center group">
+                <div class="text-5xl lg:text-6xl font-display text-accent mb-2 group-hover:scale-110 transition-transform duration-300">10K+</div>
+                <div class="text-neutral-600 font-body">Productos disponibles</div>
+            </div>
+            <div class="text-center group">
+                <div class="text-5xl lg:text-6xl font-display text-primary mb-2 group-hover:scale-110 transition-transform duration-300">100%</div>
+                <div class="text-neutral-600 font-body">Compromiso</div>
+            </div>
+        </div>
+
+        <!-- Mascot Meny -->
+        <div class="hidden lg:block absolute -right-10 bottom-0 w-48 h-48 opacity-50">
+            <img
+                src="/Meny-03.png"
+                alt="Meny"
+                class="w-full h-full object-contain"
+            />
+        </div>
+    </div>
+</section>
