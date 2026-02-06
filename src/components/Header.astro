@@ -1,46 +1,57 @@
 ---
-import MobileMenu from './MobileMenu.tsx';
+import MobileMenu from "./MobileMenu.tsx";
+import Button from "./Button.astro";
 
 const navItems = [
-    { label: 'Inicio', href: '#inicio' },
-    { label: 'Nosotros', href: '#nosotros' },
-    { label: 'Ubicaciones', href: '#ubicaciones' },
-    { label: 'Contacto', href: '#contacto' }
+    { label: "Inicio", href: "#inicio" },
+    { label: "Nosotros", href: "#nosotros" },
+    { label: "Ubicaciones", href: "#ubicaciones" },
+    { label: "Contacto", href: "#contacto" },
 ];
 ---
 
-<header id="header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+<header
+    id="header"
+    class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+>
     <div class="container mx-auto px-4 lg:px-8">
         <div class="flex items-center justify-between h-20">
             <!-- Logo -->
-            <a href="#inicio" class="relative z-50 flex items-center gap-3 group">
+            <a
+                href="#inicio"
+                class="relative z-50 flex items-center gap-3 group"
+            >
                 <img
                     src="/CONSTRURED logo-01.png"
                     alt="Construred Logo"
-                    class="h-12 w-auto transition-transform duration-300 group-hover:scale-105"
+                    class="h-30 w-auto transition-transform duration-300 group-hover:scale-105"
                 />
             </a>
 
             <!-- Desktop Navigation -->
             <nav class="hidden lg:flex items-center gap-8">
-                {navItems.map((item) => (
-                    <a
-                        href={item.href}
-                        class="nav-link font-display text-lg tracking-wider text-white hover:text-primary transition-colors duration-300 relative group drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]"
-                    >
-                        {item.label}
-                        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-                    </a>
-                ))}
+                {
+                    navItems.map((item) => (
+                        <a
+                            href={item.href}
+                            class="nav-link font-display text-lg tracking-wider text-white hover:text-primary transition-colors duration-300 relative group drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]"
+                        >
+                            {item.label}
+                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
+                        </a>
+                    ))
+                }
             </nav>
 
             <!-- CTA Button (Desktop) -->
-            <a
+            <Button
+                variant="primary"
+                size="sm"
                 href="#contacto"
-                class="hidden lg:inline-flex items-center justify-center px-6 py-2.5 bg-primary text-secondary-dark font-display tracking-wider border-2 border-primary hover:bg-primary-dark hover:border-primary-dark transition-all duration-300 shadow-industrial-sm hover:shadow-industrial transform hover:-translate-y-0.5"
+                class="hidden lg:inline-flex px-6 py-2.5"
             >
                 Cotizar
-            </a>
+            </Button>
 
             <!-- Mobile Menu -->
             <MobileMenu client:load items={navItems} />
@@ -48,14 +59,18 @@ const navItems = [
     </div>
 
     <!-- Decorative bottom border -->
-    <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent opacity-0 transition-opacity duration-300" id="header-border"></div>
+    <div
+        class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent opacity-0 transition-opacity duration-300"
+        id="header-border"
+    >
+    </div>
 </header>
 
 <script>
-    const header = document.getElementById('header');
-    const headerBorder = document.getElementById('header-border');
-    const navLinks = document.querySelectorAll('.nav-link');
-    const mobileMenuBtn = document.querySelector('[data-mobile-menu-btn]');
+    const header = document.getElementById("header");
+    const headerBorder = document.getElementById("header-border");
+    const navLinks = document.querySelectorAll(".nav-link");
+    const mobileMenuBtn = document.querySelector("[data-mobile-menu-btn]");
     let lastScrollY = 0;
 
     function updateHeader() {
@@ -64,49 +79,65 @@ const navItems = [
 
         if (isScrolled) {
             // Header con fondo blanco
-            header?.classList.add('bg-white/95', 'backdrop-blur-md', 'shadow-lg');
-            header?.classList.remove('bg-transparent');
-            headerBorder?.classList.add('opacity-100');
-            headerBorder?.classList.remove('opacity-0');
+            header?.classList.add(
+                "bg-white/95",
+                "backdrop-blur-md",
+                "shadow-lg",
+            );
+            header?.classList.remove("bg-transparent");
+            headerBorder?.classList.add("opacity-100");
+            headerBorder?.classList.remove("opacity-0");
 
             // Links oscuros sobre fondo blanco
-            navLinks.forEach(link => {
-                link.classList.remove('text-white', 'drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]');
-                link.classList.add('text-secondary');
+            navLinks.forEach((link) => {
+                link.classList.remove(
+                    "text-white",
+                    "drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]",
+                );
+                link.classList.add("text-secondary");
             });
 
             // Actualizar color del hamburger menu
-            header?.setAttribute('data-scrolled', 'true');
+            header?.setAttribute("data-scrolled", "true");
         } else {
             // Header transparente sobre hero
-            header?.classList.remove('bg-white/95', 'backdrop-blur-md', 'shadow-lg');
-            header?.classList.add('bg-transparent');
-            headerBorder?.classList.remove('opacity-100');
-            headerBorder?.classList.add('opacity-0');
+            header?.classList.remove(
+                "bg-white/95",
+                "backdrop-blur-md",
+                "shadow-lg",
+            );
+            header?.classList.add("bg-transparent");
+            headerBorder?.classList.remove("opacity-100");
+            headerBorder?.classList.add("opacity-0");
 
             // Links blancos sobre hero oscuro
-            navLinks.forEach(link => {
-                link.classList.remove('text-secondary');
-                link.classList.add('text-white', 'drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]');
+            navLinks.forEach((link) => {
+                link.classList.remove("text-secondary");
+                link.classList.add(
+                    "text-white",
+                    "drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]",
+                );
             });
 
             // Actualizar color del hamburger menu
-            header?.setAttribute('data-scrolled', 'false');
+            header?.setAttribute("data-scrolled", "false");
         }
 
         // Hide header on scroll down, show on scroll up
         if (scrollY > lastScrollY && scrollY > 200) {
-            header?.classList.add('-translate-y-full');
+            header?.classList.add("-translate-y-full");
         } else {
-            header?.classList.remove('-translate-y-full');
+            header?.classList.remove("-translate-y-full");
         }
 
         lastScrollY = scrollY;
 
         // Dispatch custom event for React components
-        window.dispatchEvent(new CustomEvent('headerScrollChange', { detail: { isScrolled } }));
+        window.dispatchEvent(
+            new CustomEvent("headerScrollChange", { detail: { isScrolled } }),
+        );
     }
 
-    window.addEventListener('scroll', updateHeader, { passive: true });
+    window.addEventListener("scroll", updateHeader, { passive: true });
     updateHeader();
 </script>

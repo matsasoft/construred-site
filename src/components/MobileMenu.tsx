@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Button from './Button';
 
 interface NavItem {
     label: string;
@@ -121,13 +122,9 @@ export default function MobileMenu({ items }: MobileMenuProps) {
                             transitionDelay: isOpen ? `${items.length * 100}ms` : '0ms'
                         }}
                     >
-                        <a
-                            href="#contacto"
-                            onClick={handleLinkClick}
-                            className="inline-flex items-center justify-center px-8 py-4 bg-primary text-secondary-dark font-display text-xl tracking-wider border-2 border-primary hover:bg-primary-dark hover:border-primary-dark transition-all duration-300"
-                        >
+                        <Button variant="primary" size="lg" href="#contacto" onClick={handleLinkClick} className="text-xl">
                             Cotiza Ahora
-                        </a>
+                        </Button>
                     </div>
                 </nav>
             </div>

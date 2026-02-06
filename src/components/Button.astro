@@ -1,34 +1,42 @@
 ---
 interface Props {
-    variant?: 'primary' | 'secondary' | 'accent' | 'outline';
-    size?: 'sm' | 'md' | 'lg';
+    variant?: "primary" | "primary-flat" | "secondary" | "accent" | "outline" | "ghost";
+    size?: "sm" | "md" | "lg";
     href?: string;
     class?: string;
-    type?: 'button' | 'submit' | 'reset';
+    type?: "button" | "submit" | "reset";
+    target?: string;
+    rel?: string;
 }
 
 const {
-    variant = 'primary',
-    size = 'md',
+    variant = "primary",
+    size = "md",
     href,
-    class: className = '',
-    type = 'button'
+    class: className = "",
+    type = "button",
+    target,
+    rel,
 } = Astro.props;
 
 const baseStyles = `
     inline-flex items-center justify-center
     font-display font-normal tracking-wider uppercase
     transition-all duration-300 ease-out
-    border-2 cursor-pointer
+    border-2 cursor-pointer rounded-md
     relative overflow-hidden
     transform hover:-translate-y-0.5 active:translate-y-0
 `;
 
-const variants = {
+const variants: Record<string, string> = {
     primary: `
         bg-primary text-secondary-dark border-primary
         hover:bg-primary-dark hover:border-primary-dark
         shadow-industrial-sm hover:shadow-industrial
+    `,
+    "primary-flat": `
+        bg-primary text-secondary-dark border-primary
+        hover:bg-primary-dark hover:border-primary-dark
     `,
     secondary: `
         bg-secondary text-white border-secondary
@@ -43,30 +51,36 @@ const variants = {
     outline: `
         bg-transparent text-secondary border-secondary
         hover:bg-secondary hover:text-white
-    `
+    `,
+    ghost: `
+        bg-transparent text-white border-white
+        hover:bg-white hover:text-secondary
+    `,
 };
 
-const sizes = {
-    sm: 'px-4 py-2 text-sm',
-    md: 'px-6 py-3 text-base',
-    lg: 'px-8 py-4 text-lg'
+const sizes: Record<string, string> = {
+    sm: "px-4 py-2 text-sm",
+    md: "px-6 py-3 text-base",
+    lg: "px-8 py-4 text-lg",
 };
-
-const Element = href ? 'a' : 'button';
 ---
 
-{href ? (
-    <a
-        href={href}
-        class:list={[baseStyles, variants[variant], sizes[size], className]}
-    >
-        <slot />
-    </a>
-) : (
-    <button
-        type={type}
-        class:list={[baseStyles, variants[variant], sizes[size], className]}
-    >
-        <slot />
-    </button>
-)}
+{
+    href ? (
+        <a
+            href={href}
+            class:list={[baseStyles, variants[variant], sizes[size], className]}
+            target={target}
+            rel={rel}
+        >
+            <slot />
+        </a>
+    ) : (
+        <button
+            type={type}
+            class:list={[baseStyles, variants[variant], sizes[size], className]}
+        >
+            <slot />
+        </button>
+    )
+}

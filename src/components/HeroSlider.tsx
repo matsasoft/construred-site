@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import Button from './Button';
 
 interface Slide {
     id: number;
@@ -129,18 +130,12 @@ export default function HeroSlider() {
                                             animationFillMode: 'forwards'
                                         }}
                                     >
-                                        <a
-                                            href="#contacto"
-                                            className="inline-flex items-center justify-center px-8 py-4 bg-primary text-secondary-dark font-display text-lg tracking-wider border-2 border-primary hover:bg-primary-dark hover:border-primary-dark transition-all duration-300 shadow-industrial hover:shadow-[6px_6px_0_0_var(--color-secondary),12px_12px_0_0_var(--color-primary-dark)] transform hover:-translate-y-1"
-                                        >
+                                        <Button variant="primary" size="lg" href="#contacto" className="shadow-industrial hover:shadow-[6px_6px_0_0_var(--color-secondary),12px_12px_0_0_var(--color-primary-dark)] hover:-translate-y-1">
                                             Cotizar Ahora
-                                        </a>
-                                        <a
-                                            href="#nosotros"
-                                            className="inline-flex items-center justify-center px-8 py-4 bg-transparent text-white font-display text-lg tracking-wider border-2 border-white hover:bg-white hover:text-secondary transition-all duration-300"
-                                        >
+                                        </Button>
+                                        <Button variant="ghost" size="lg" href="#nosotros">
                                             Conocer Más
-                                        </a>
+                                        </Button>
                                     </div>
                                 </>
                             )}
