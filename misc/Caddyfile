@@ -1,0 +1,45 @@
+miconstrured.cloud {
+    root * /var/www/construred
+    file_server
+
+    # Compresión
+    encode gzip zstd
+
+    # Clean URLs: intenta el archivo, luego el directorio, luego .html
+    try_files {path} {path}/ {path}.html
+
+    # Headers de seguridad
+    header {
+        # Prevenir ataques XSS
+        X-Content-Type-Options nosniff
+        # Evitar que tu sitio se muestre en un iframe ajeno
+        X-Frame-Options SAMEORIGIN
+        # Controlar qué info se envía como referrer
+        Referrer-Policy strict-origin-when-cross-origin
+        # Política de permisos del navegador
+        Permissions-Policy "camera=(), microphone=()"
+        # Eliminar header que expone la tecnología del servidor
+        -Server
+    }
+
+    # Cache para assets estáticos (CSS, JS, imágenes)
+    @static path *.css *.js *.ico *.gif *.jpg *.jpeg *.png *.svg *.webp *.woff *.woff2
+    header @static Cache-Control "public, max-age=31536000, immutable"
+
+    # Cache corto para HTML
+    @html path *.html /
+    header @html Cache-Control "public, max-age=3600, must-revalidate"
+
+    # Logs de acceso
+    log {
+        output file /var/log/caddy/construred-access.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+    }
+}
+
+# Redirigir www a la versión sin www
+www.miconstrured.cloud {
+    redir https://miconstrured.cloud{uri} permanent
+}
