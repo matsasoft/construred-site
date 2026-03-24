@@ -16,6 +16,10 @@ interface StoreWithDistance extends Store {
 
 const RADIUS_OPTIONS = [10, 25, 50, 100, 200];
 
+function roundUpToOption(km: number): number {
+  return RADIUS_OPTIONS.find((r) => r >= km) ?? RADIUS_OPTIONS[RADIUS_OPTIONS.length - 1];
+}
+
 // =====================
 // Main Component
 // =====================
@@ -53,12 +57,26 @@ export default function StoreFinder() {
       .sort((a, b) => a.distance - b.distance);
   }, [userLocation]);
 
+  // ----- derived: radius center (centroid of selected city or user location) -----
+  const radiusCenter = useMemo(() => {
+    if (filterMunicipio === "todos") return userLocation ?? DEFAULT_CENTER;
+    const cityStores = stores.filter((s) => s.municipio === filterMunicipio);
+    return {
+      lat: cityStores.reduce((sum, s) => sum + s.lat, 0) / cityStores.length,
+      lng: cityStores.reduce((sum, s) => sum + s.lng, 0) / cityStores.length,
+    };
+  }, [filterMunicipio, userLocation]);
+
   // ----- derived: filtered stores -----
   const filteredStores = useMemo(() => {
     let result = storesWithDistance;
 
-    // radius filter
-    result = result.filter((s) => s.distance <= radiusKm);
+    // radius filter (from radiusCenter, not user location)
+    result = result.filter(
+      (s) =>
+        haversineDistance(radiusCenter.lat, radiusCenter.lng, s.lat, s.lng) <=
+        radiusKm,
+    );
 
     // municipio filter
     if (filterMunicipio !== "todos") {
@@ -78,7 +96,7 @@ export default function StoreFinder() {
     }
 
     return result;
-  }, [storesWithDistance, radiusKm, filterMunicipio, searchQuery]);
+  }, [storesWithDistance, radiusKm, radiusCenter, filterMunicipio, searchQuery]);
 
   // ----- geolocation -----
   useEffect(() => {
@@ -94,6 +112,24 @@ export default function StoreFinder() {
     } else {
       setUserLocation(DEFAULT_CENTER);
     }
+  }, []);
+
+  // ----- inject marker bounce keyframes -----
+  useEffect(() => {
+    const styleId = "marker-bounce-keyframes";
+    if (document.getElementById(styleId)) return;
+    const style = document.createElement("style");
+    style.id = styleId;
+    style.textContent = `
+      @keyframes markerBounce {
+        0%   { transform: rotate(-45deg) scale(1); }
+        30%  { transform: rotate(-45deg) scale(1.45); }
+        50%  { transform: rotate(-45deg) scale(1.2); }
+        70%  { transform: rotate(-45deg) scale(1.35); }
+        100% { transform: rotate(-45deg) scale(1.3); }
+      }
+    `;
+    document.head.appendChild(style);
   }, []);
 
   // ----- load Google Maps script -----
@@ -123,22 +159,35 @@ export default function StoreFinder() {
   }, [apiKey]);
 
   // ----- create custom marker element -----
-  const createStoreMarkerElement = useCallback(() => {
-    const el = document.createElement("div");
-    el.innerHTML = `
+  const createStoreMarkerElement = useCallback(
+    (isSelected: boolean, isDimmed: boolean) => {
+      const el = document.createElement("div");
+      const scale = isSelected ? "scale(1.3)" : "scale(1)";
+      const shadow = isSelected
+        ? "0 8px 24px rgba(0,0,0,0.4), 0 0 0 6px rgba(245,185,50,0.4)"
+        : "0 4px 8px rgba(0,0,0,0.3)";
+      const opacity = isDimmed ? "0.5" : "1";
+      const animation = isSelected
+        ? "animation:markerBounce 0.5s ease-out forwards;"
+        : "";
+      el.innerHTML = `
       <div style="
         width:40px;height:40px;
         background:#f5b932;border:3px solid #2d3e7c;
         border-radius:50% 50% 50% 0;
-        transform:rotate(-45deg);
+        transform:rotate(-45deg) ${scale};
         display:flex;align-items:center;justify-content:center;
-        box-shadow:0 4px 8px rgba(0,0,0,0.3);
-        cursor:pointer;transition:transform 0.3s;
+        box-shadow:${shadow};
+        opacity:${opacity};
+        cursor:pointer;transition:transform 0.3s,box-shadow 0.3s,opacity 0.3s;
+        ${animation}
       ">
         <span style="transform:rotate(45deg);font-weight:bold;color:#2d3e7c;font-size:14px;">C</span>
       </div>`;
-    return el;
-  }, []);
+      return el;
+    },
+    [],
+  );
 
   const createUserMarkerElement = useCallback(() => {
     const el = document.createElement("div");
@@ -209,12 +258,13 @@ export default function StoreFinder() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMapReady, mapError, userLocation]);
 
-  // ----- sync circle radius -----
+  // ----- sync circle radius + center -----
   useEffect(() => {
     if (circleRef.current) {
       circleRef.current.setRadius(radiusKm * 1000);
+      circleRef.current.setCenter(radiusCenter);
     }
-  }, [radiusKm]);
+  }, [radiusKm, radiusCenter]);
 
   // ----- sync markers to filteredStores -----
   useEffect(() => {
@@ -225,13 +275,19 @@ export default function StoreFinder() {
     markersRef.current.forEach((m) => (m.map = null));
     markersRef.current = [];
 
+    const hasSelection = selectedStore !== null && drawerOpen;
+
     // add new markers
     filteredStores.forEach((store) => {
+      const isSelected = hasSelection && store.id === selectedStore?.id;
+      const isDimmed = hasSelection && !isSelected;
+
       const marker = new google.maps.marker.AdvancedMarkerElement({
         map: mapInstance,
         position: { lat: store.lat, lng: store.lng },
-        content: createStoreMarkerElement(),
+        content: createStoreMarkerElement(isSelected, isDimmed),
         title: store.nombre,
+        zIndex: isSelected ? 10 : 1,
       });
 
       marker.addListener("click", () => {
@@ -243,7 +299,7 @@ export default function StoreFinder() {
 
       markersRef.current.push(marker);
     });
-  }, [filteredStores, isMapReady, createStoreMarkerElement]);
+  }, [filteredStores, isMapReady, createStoreMarkerElement, selectedStore, drawerOpen]);
 
   // ----- helpers -----
   const selectStore = useCallback((store: StoreWithDistance) => {
@@ -256,10 +312,60 @@ export default function StoreFinder() {
     }
   }, []);
 
+  const handleCityFilter = useCallback(
+    (municipio: string) => {
+      setFilterMunicipio(municipio);
+      const map = mapInstanceRef.current;
+      if (!map || !window.google) return;
+
+      if (municipio === "todos") {
+        setRadiusKm(50);
+        const loc = userLocation ?? DEFAULT_CENTER;
+        const nearbyStores = stores.filter(
+          (s) => haversineDistance(loc.lat, loc.lng, s.lat, s.lng) <= 50,
+        );
+        if (nearbyStores.length > 0) {
+          const bounds = new google.maps.LatLngBounds();
+          nearbyStores.forEach((s) =>
+            bounds.extend({ lat: s.lat, lng: s.lng }),
+          );
+          bounds.extend(loc);
+          map.fitBounds(bounds, { top: 80, right: 20, bottom: 20, left: 20 });
+        } else {
+          map.panTo(loc);
+          map.setZoom(11);
+        }
+      } else {
+        const cityStores = stores.filter((s) => s.municipio === municipio);
+        const centroid = {
+          lat:
+            cityStores.reduce((sum, s) => sum + s.lat, 0) / cityStores.length,
+          lng:
+            cityStores.reduce((sum, s) => sum + s.lng, 0) / cityStores.length,
+        };
+        const maxDist = Math.max(
+          ...cityStores.map((s) =>
+            haversineDistance(centroid.lat, centroid.lng, s.lat, s.lng),
+          ),
+        );
+        setRadiusKm(roundUpToOption(Math.ceil(maxDist * 1.2)));
+        const bounds = new google.maps.LatLngBounds();
+        cityStores.forEach((s) =>
+          bounds.extend({ lat: s.lat, lng: s.lng }),
+        );
+        map.fitBounds(bounds, { top: 80, right: 20, bottom: 20, left: 20 });
+      }
+    },
+    [userLocation],
+  );
+
   const centerOnUser = useCallback(() => {
     const map = mapInstanceRef.current;
-    if (map && userLocation) {
-      map.panTo(userLocation);
+    const loc = userLocation ?? DEFAULT_CENTER;
+    if (map) {
+      setFilterMunicipio("todos");
+      setRadiusKm(50);
+      map.panTo(loc);
       map.setZoom(11);
     }
   }, [userLocation]);
@@ -607,27 +713,32 @@ export default function StoreFinder() {
                   </p>
                 </div>
 
-                {/* Municipio */}
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-primary/20 flex items-center justify-center shrink-0 rounded">
-                    <svg
-                      className="w-4 h-4 text-primary"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                {/* Correo */}
+                {selectedStore.correo && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-primary/20 flex items-center justify-center shrink-0 rounded">
+                      <svg
+                        className="w-4 h-4 text-primary"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                    <a
+                      href={`mailto:${selectedStore.correo}`}
+                      className="text-secondary hover:text-primary transition-colors text-sm font-medium"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                      />
-                    </svg>
+                      {selectedStore.correo}
+                    </a>
                   </div>
-                  <p className="text-neutral-600 text-sm">
-                    {selectedStore.municipio}, {selectedStore.estado}
-                  </p>
-                </div>
+                )}
 
                 {/* Actions */}
                 <div className="pt-2 space-y-3">
@@ -641,14 +752,37 @@ export default function StoreFinder() {
                   >
                     Cómo Llegar
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    href={`tel:${selectedStore.telefono.replace(/\s/g, "")}`}
-                    className="w-full"
-                  >
-                    Llamar
-                  </Button>
+                  {selectedStore.whatsapp ? (
+                    <a
+                      href={`https://wa.me/${selectedStore.whatsapp}?text=${encodeURIComponent(`Hola, me interesa cotizar materiales en ${selectedStore.nombre}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 w-full px-4 py-2 text-sm font-display font-normal tracking-wider uppercase bg-[#25D366] text-white border-2 border-[#25D366] rounded-md transition-all duration-300 ease-out cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0 hover:bg-[#1da851] hover:border-[#1da851] relative overflow-hidden"
+                    >
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                      </svg>
+                      Cotizar por Whatsapp
+                    </a>
+                  ) : selectedStore.correo ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      href={`mailto:${selectedStore.correo}?subject=${encodeURIComponent(`Cotización - Construred ${selectedStore.nombre}`)}`}
+                      className="w-full"
+                    >
+                      Cotizar por Correo
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      href={`tel:${selectedStore.telefono.replace(/\s/g, "")}`}
+                      className="w-full"
+                    >
+                      Llamar
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
@@ -680,7 +814,7 @@ export default function StoreFinder() {
               {["todos", "Chihuahua", "Cuauhtémoc", "Delicias"].map((m) => (
                 <button
                   key={m}
-                  onClick={() => setFilterMunicipio(m)}
+                  onClick={() => handleCityFilter(m)}
                   className={`px-4 py-2 rounded font-display tracking-wider text-sm uppercase transition-all duration-300 border-2 ${
                     filterMunicipio === m
                       ? "bg-primary text-secondary border-primary shadow-industrial-sm"
@@ -723,9 +857,8 @@ export default function StoreFinder() {
               </p>
               <button
                 onClick={() => {
-                  setRadiusKm(200);
+                  handleCityFilter("todos");
                   setSearchQuery("");
-                  setFilterMunicipio("todos");
                 }}
                 className="mt-4 text-primary hover:text-primary-dark font-display tracking-wider transition-colors"
               >

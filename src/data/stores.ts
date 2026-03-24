@@ -10,6 +10,8 @@ export interface Store {
   telefono: string;
   horario: string;
   imagen: string;
+  correo?: string;
+  whatsapp?: string;
 }
 
 export const stores: Store[] = [
@@ -27,6 +29,8 @@ export const stores: Store[] = [
     horario: "Lun-Sáb: 8:00 - 19:00",
     imagen:
       "https://placehold.co/600x400/2d3e7c/f5b932?text=Construred+Centro",
+    correo: "centro@construred.com.mx",
+    whatsapp: "5216141234567",
   },
   {
     id: 2,
@@ -41,6 +45,8 @@ export const stores: Store[] = [
     horario: "Lun-Sáb: 8:00 - 19:00",
     imagen:
       "https://placehold.co/600x400/2d3e7c/f5b932?text=Construred+Tecnologico",
+    correo: "tecnologico@construred.com.mx",
+    whatsapp: "5216142345678",
   },
   {
     id: 3,
@@ -55,6 +61,8 @@ export const stores: Store[] = [
     horario: "Lun-Sáb: 8:00 - 19:00",
     imagen:
       "https://placehold.co/600x400/2d3e7c/f5b932?text=Construred+Industrias",
+    correo: "industrias@construred.com.mx",
+    whatsapp: "5216143456789",
   },
   {
     id: 4,
@@ -69,6 +77,8 @@ export const stores: Store[] = [
     horario: "Lun-Sáb: 8:00 - 19:00",
     imagen:
       "https://placehold.co/600x400/2d3e7c/f5b932?text=Construred+Periferico",
+    correo: "periferico@construred.com.mx",
+    whatsapp: "5216144567890",
   },
   {
     id: 5,
@@ -83,6 +93,8 @@ export const stores: Store[] = [
     horario: "Lun-Sáb: 8:00 - 19:00",
     imagen:
       "https://placehold.co/600x400/2d3e7c/f5b932?text=Construred+Universidad",
+    correo: "universidad@construred.com.mx",
+    whatsapp: "5216145678901",
   },
   {
     id: 6,
@@ -97,6 +109,7 @@ export const stores: Store[] = [
     horario: "Lun-Sáb: 8:00 - 19:00",
     imagen:
       "https://placehold.co/600x400/2d3e7c/f5b932?text=Construred+Cantera",
+    correo: "cantera@construred.com.mx",
   },
   {
     id: 7,
@@ -111,6 +124,8 @@ export const stores: Store[] = [
     horario: "Lun-Sáb: 8:00 - 19:00",
     imagen:
       "https://placehold.co/600x400/2d3e7c/f5b932?text=Construred+Riberas",
+    correo: "riberas@construred.com.mx",
+    whatsapp: "5216147890123",
   },
   {
     id: 8,
@@ -125,6 +140,7 @@ export const stores: Store[] = [
     horario: "Lun-Sáb: 8:00 - 18:00",
     imagen:
       "https://placehold.co/600x400/2d3e7c/f5b932?text=Construred+NombreDeDios",
+    whatsapp: "5216148901234",
   },
   {
     id: 9,
@@ -139,6 +155,8 @@ export const stores: Store[] = [
     horario: "Lun-Sáb: 8:00 - 19:00",
     imagen:
       "https://placehold.co/600x400/2d3e7c/f5b932?text=Construred+Avalos",
+    correo: "avalos@construred.com.mx",
+    whatsapp: "5216149012345",
   },
   {
     id: 10,
@@ -153,6 +171,7 @@ export const stores: Store[] = [
     horario: "Lun-Sáb: 8:00 - 19:00",
     imagen:
       "https://placehold.co/600x400/2d3e7c/f5b932?text=Construred+Sacramento",
+    correo: "sacramento@construred.com.mx",
   },
   {
     id: 11,
@@ -181,6 +200,7 @@ export const stores: Store[] = [
     horario: "Lun-Sáb: 8:00 - 19:00",
     imagen:
       "https://placehold.co/600x400/2d3e7c/f5b932?text=Construred+Robinson",
+    correo: "robinson@construred.com.mx",
   },
 
   // === Cuauhtémoc (5 tiendas) ===
@@ -197,6 +217,8 @@ export const stores: Store[] = [
     horario: "Lun-Sáb: 8:00 - 18:00",
     imagen:
       "https://placehold.co/600x400/2d3e7c/f5b932?text=Construred+Cuauhtemoc+Centro",
+    correo: "cuauhtemoc.centro@construred.com.mx",
+    whatsapp: "5216255811234",
   },
   {
     id: 14,
@@ -211,6 +233,7 @@ export const stores: Store[] = [
     horario: "Lun-Sáb: 8:00 - 18:00",
     imagen:
       "https://placehold.co/600x400/2d3e7c/f5b932?text=Construred+Cuauhtemoc+Norte",
+    whatsapp: "5216255812345",
   },
   {
     id: 15,
@@ -225,6 +248,7 @@ export const stores: Store[] = [
     horario: "Lun-Sáb: 8:00 - 18:00",
     imagen:
       "https://placehold.co/600x400/2d3e7c/f5b932?text=Construred+Cuauhtemoc+Sur",
+    correo: "cuauhtemoc.sur@construred.com.mx",
   },
   {
     id: 16,
@@ -253,6 +277,7 @@ export const stores: Store[] = [
     horario: "Lun-Sáb: 8:00 - 18:00",
     imagen:
       "https://placehold.co/600x400/2d3e7c/f5b932?text=Construred+Anahuac",
+    whatsapp: "5216255815678",
   },
 
   // === Delicias (5 tiendas) ===
@@ -269,6 +294,8 @@ export const stores: Store[] = [
     horario: "Lun-Sáb: 8:00 - 18:00",
     imagen:
       "https://placehold.co/600x400/2d3e7c/f5b932?text=Construred+Delicias+Centro",
+    correo: "delicias.centro@construred.com.mx",
+    whatsapp: "5216394721234",
   },
   {
     id: 19,
@@ -283,6 +310,8 @@ export const stores: Store[] = [
     horario: "Lun-Sáb: 8:00 - 18:00",
     imagen:
       "https://placehold.co/600x400/2d3e7c/f5b932?text=Construred+Delicias+Oriente",
+    correo: "delicias.oriente@construred.com.mx",
+    whatsapp: "5216394722345",
   },
   {
     id: 20,
@@ -297,6 +326,7 @@ export const stores: Store[] = [
     horario: "Lun-Sáb: 8:00 - 18:00",
     imagen:
       "https://placehold.co/600x400/2d3e7c/f5b932?text=Construred+Delicias+Sur",
+    correo: "delicias.sur@construred.com.mx",
   },
   {
     id: 21,
@@ -311,6 +341,7 @@ export const stores: Store[] = [
     horario: "Lun-Sáb: 8:00 - 18:00",
     imagen:
       "https://placehold.co/600x400/2d3e7c/f5b932?text=Construred+Delicias+Poniente",
+    correo: "delicias.poniente@construred.com.mx",
   },
   {
     id: 22,
