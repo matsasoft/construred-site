@@ -1,0 +1,19 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import StoreFinder from '../components/StoreFinder.tsx';
+---
+
+<Layout
+  title="Sucursales | Construred - Ferreterías y Materiales de Construcción"
+  description="Encuentra la sucursal Construred más cercana a ti en Chihuahua, Cuauhtémoc y Delicias. Materiales de construcción, eléctricos y plomería."
+>
+  <Header />
+
+  <main class="pt-20">
+    <StoreFinder client:load />
+  </main>
+
+  <Footer />
+</Layout>
