@@ -40,6 +40,7 @@ export default function StoreFinder() {
   const [mapError, setMapError] = useState<string | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [radiusKm, setRadiusKm] = useState(50);
   const [filterMunicipio, setFilterMunicipio] = useState<string>("todos");
@@ -114,7 +115,7 @@ export default function StoreFinder() {
     }
   }, []);
 
-  // ----- inject marker bounce keyframes -----
+  // ----- inject marker bounce + modal keyframes -----
   useEffect(() => {
     const styleId = "marker-bounce-keyframes";
     if (document.getElementById(styleId)) return;
@@ -128,9 +129,32 @@ export default function StoreFinder() {
         70%  { transform: rotate(-45deg) scale(1.35); }
         100% { transform: rotate(-45deg) scale(1.3); }
       }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+      }
+      @keyframes modalIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to   { opacity: 1; transform: scale(1); }
+      }
     `;
     document.head.appendChild(style);
   }, []);
+
+  // ----- image modal: escape key + body scroll lock -----
+  useEffect(() => {
+    if (!imageModalOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setImageModalOpen(false);
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", handleEsc);
+    };
+  }, [imageModalOpen]);
 
   // ----- load Google Maps script -----
   useEffect(() => {
@@ -540,7 +564,7 @@ export default function StoreFinder() {
             {/* Backdrop */}
             <div
               className="fixed inset-0 bg-black/30 z-30 lg:hidden"
-              onClick={() => setDrawerOpen(false)}
+              onClick={() => { setDrawerOpen(false); setImageModalOpen(false); }}
             />
 
             {/* Drawer */}
@@ -563,7 +587,7 @@ export default function StoreFinder() {
 
               {/* Close button */}
               <button
-                onClick={() => setDrawerOpen(false)}
+                onClick={() => { setDrawerOpen(false); setImageModalOpen(false); }}
                 className="absolute top-4 right-4 p-2 rounded-full bg-neutral-100 hover:bg-neutral-200 transition-colors z-10"
                 aria-label="Cerrar"
               >
@@ -583,17 +607,26 @@ export default function StoreFinder() {
               </button>
 
               {/* Store Image */}
-              <div className="relative h-48 lg:h-56 bg-secondary overflow-hidden">
+              <div
+                className="relative h-48 lg:h-56 bg-secondary overflow-hidden cursor-pointer group/img"
+                onClick={() => setImageModalOpen(true)}
+              >
                 <img
                   src={selectedStore.imagen}
                   alt={selectedStore.nombre}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-all duration-500 group-hover/img:scale-110 group-hover/img:brightness-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-secondary/80 to-transparent" />
                 <div className="absolute bottom-4 left-4 right-4">
                   <h3 className="text-2xl lg:text-3xl font-display text-white tracking-wider">
                     {selectedStore.nombre}
                   </h3>
+                </div>
+                {/* Expand hint icon */}
+                <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-sm text-white p-1.5 rounded-full opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                  </svg>
                 </div>
               </div>
 
@@ -902,6 +935,40 @@ export default function StoreFinder() {
           </Button>
         </div>
       </section>
+
+      {/* ===== IMAGE LIGHTBOX MODAL ===== */}
+      {imageModalOpen && selectedStore && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Imagen de sucursal"
+        >
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm animate-[fadeIn_300ms_ease-out_forwards]"
+            onClick={() => setImageModalOpen(false)}
+          />
+
+          {/* Close button */}
+          <button
+            onClick={() => setImageModalOpen(false)}
+            className="absolute top-4 right-4 z-10 p-2.5 rounded-full bg-white/10 hover:bg-white/25 text-white transition-colors duration-200"
+            aria-label="Cerrar imagen"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {/* Image */}
+          <img
+            src={selectedStore.imagen}
+            alt={selectedStore.nombre}
+            className="relative z-[1] max-w-[90vw] max-h-[85vh] object-contain rounded-lg shadow-2xl animate-[modalIn_300ms_ease-out_forwards]"
+          />
+        </div>
+      )}
     </div>
   );
 }
