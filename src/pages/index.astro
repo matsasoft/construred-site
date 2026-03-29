@@ -6,6 +6,9 @@ import AboutSection from '../components/AboutSection.astro';
 import GoogleMap from '../components/GoogleMap.tsx';
 import ContactForm from '../components/ContactForm.tsx';
 import Footer from '../components/Footer.astro';
+import { fetchStores } from '../data/stores';
+
+const stores = await fetchStores();
 ---
 
 <Layout>
@@ -19,7 +22,7 @@ import Footer from '../components/Footer.astro';
 		<AboutSection />
 
 		<!-- Locations Map Section -->
-		<GoogleMap client:visible />
+		<GoogleMap client:visible stores={stores} />
 
 		<!-- Contact Form Section -->
 		<ContactForm client:visible />

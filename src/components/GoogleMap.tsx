@@ -1,74 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { type Store, DEFAULT_CENTER, haversineDistance } from "../data/stores";
 import Button from "./Button";
 
-interface Location {
-  id: number;
-  name: string;
-  lat: number;
-  lng: number;
-  address: string;
-  phone: string;
-  hours: string;
-}
-
-const locations: Location[] = [
-  {
-    id: 1,
-    name: "Construred Centro",
-    lat: 28.6353,
-    lng: -106.0889,
-    address: "Av. Independencia 1520, Centro, Chihuahua",
-    phone: "614 123 4567",
-    hours: "Lun-Sáb: 8:00 - 19:00",
-  },
-  {
-    id: 2,
-    name: "Construred Tecnológico",
-    lat: 28.67,
-    lng: -106.08,
-    address: "Av. Tecnológico 4500, Col. Las Granjas, Chihuahua",
-    phone: "614 234 5678",
-    hours: "Lun-Sáb: 8:00 - 19:00",
-  },
-  {
-    id: 3,
-    name: "Construred Industrias",
-    lat: 28.595,
-    lng: -106.065,
-    address: "Av. de las Industrias 8901, Complejo Industrial, Chihuahua",
-    phone: "614 345 6789",
-    hours: "Lun-Sáb: 8:00 - 19:00",
-  },
-  {
-    id: 4,
-    name: "Construred Periférico",
-    lat: 28.645,
-    lng: -106.125,
-    address: "Periférico de la Juventud 3200, Col. Jardines del Sol, Chihuahua",
-    phone: "614 456 7890",
-    hours: "Lun-Sáb: 8:00 - 19:00",
-  },
-  {
-    id: 5,
-    name: "Construred Universidad",
-    lat: 28.615,
-    lng: -106.045,
-    address: "Av. Universidad 2800, Col. San Felipe, Chihuahua",
-    phone: "614 567 8901",
-    hours: "Lun-Sáb: 8:00 - 19:00",
-  },
-];
-
-export default function GoogleMap() {
+export default function GoogleMap({ stores }: { stores: Store[] }) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(
-    null,
-  );
+  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
@@ -88,11 +29,11 @@ export default function GoogleMap() {
         },
         () => {
           // Default to Chihuahua if location denied
-          setUserLocation({ lat: 28.6353, lng: -106.0889 });
+          setUserLocation(DEFAULT_CENTER);
         },
       );
     } else {
-      setUserLocation({ lat: 28.6353, lng: -106.0889 });
+      setUserLocation(DEFAULT_CENTER);
     }
   }, []);
 
@@ -161,9 +102,8 @@ export default function GoogleMap() {
 
     setMap(mapInstance);
 
-    // Add markers for each location
-    locations.forEach((location) => {
-      // Create custom marker element
+    // Add markers for each store
+    stores.forEach((store) => {
       const markerElement = document.createElement("div");
       markerElement.className = "construred-marker";
       markerElement.innerHTML = `
@@ -192,14 +132,14 @@ export default function GoogleMap() {
 
       const marker = new google.maps.marker.AdvancedMarkerElement({
         map: mapInstance,
-        position: { lat: location.lat, lng: location.lng },
+        position: { lat: store.lat, lng: store.lng },
         content: markerElement,
-        title: location.name,
+        title: store.nombre,
       });
 
       marker.addListener("click", () => {
-        setSelectedLocation(location);
-        mapInstance.panTo({ lat: location.lat, lng: location.lng });
+        setSelectedStore(store);
+        mapInstance.panTo({ lat: store.lat, lng: store.lng });
       });
 
       markersRef.current.push(marker);
@@ -231,7 +171,7 @@ export default function GoogleMap() {
       markersRef.current.forEach((marker) => (marker.map = null));
       markersRef.current = [];
     };
-  }, [isLoading, error, userLocation]);
+  }, [isLoading, error, userLocation, stores]);
 
   const centerOnUser = useCallback(() => {
     if (map && userLocation) {
@@ -241,28 +181,30 @@ export default function GoogleMap() {
   }, [map, userLocation]);
 
   const findNearest = useCallback(() => {
-    if (!userLocation) return;
+    if (!userLocation || stores.length === 0) return;
 
-    let nearestLocation = locations[0];
+    let nearest = stores[0];
     let minDistance = Infinity;
 
-    locations.forEach((location) => {
-      const distance = Math.sqrt(
-        Math.pow(location.lat - userLocation.lat, 2) +
-          Math.pow(location.lng - userLocation.lng, 2),
+    stores.forEach((store) => {
+      const distance = haversineDistance(
+        userLocation.lat,
+        userLocation.lng,
+        store.lat,
+        store.lng,
       );
       if (distance < minDistance) {
         minDistance = distance;
-        nearestLocation = location;
+        nearest = store;
       }
     });
 
-    setSelectedLocation(nearestLocation);
+    setSelectedStore(nearest);
     if (map) {
-      map.panTo({ lat: nearestLocation.lat, lng: nearestLocation.lng });
+      map.panTo({ lat: nearest.lat, lng: nearest.lng });
       map.setZoom(15);
     }
-  }, [map, userLocation]);
+  }, [map, userLocation, stores]);
 
   if (error) {
     return (
@@ -293,27 +235,31 @@ export default function GoogleMap() {
             </p>
           </div>
 
-          {/* Location List Fallback */}
+          {/* Store List Fallback */}
           <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {locations.map((location) => (
+            {stores.map((store) => (
               <div
-                key={location.id}
+                key={store.id}
                 className="bg-white/10 backdrop-blur-sm p-6 border-l-4 border-primary"
               >
                 <h3 className="text-xl font-display text-white mb-2">
-                  {location.name}
+                  {store.nombre}
                 </h3>
                 <p className="text-neutral-300 text-sm mb-1">
-                  {location.address}
+                  {store.direccion}
                 </p>
-                <p className="text-primary text-sm mb-1">{location.phone}</p>
-                <p className="text-neutral-400 text-sm">{location.hours}</p>
+                {store.telefono && (
+                  <p className="text-primary text-sm mb-1">{store.telefono}</p>
+                )}
+                {store.horario && (
+                  <p className="text-neutral-400 text-sm">{store.horario}</p>
+                )}
               </div>
             ))}
           </div>
 
           <div className="mt-8 text-center">
-            <Button variant="primary-flat" size="lg" href="/tiendas">
+            <Button variant="primary-flat" size="lg" href="/sucursales">
               Ver Todas las Tiendas
             </Button>
           </div>
@@ -400,12 +346,12 @@ export default function GoogleMap() {
             </div>
           </div>
 
-          {/* Location Info Panel */}
+          {/* Store Info Panel */}
           <div className="space-y-4">
-            {selectedLocation ? (
+            {selectedStore ? (
               <div className="bg-white p-6 rounded-lg shadow-lg border-l-4 border-primary animate-fade-in-up">
                 <h3 className="text-2xl font-display text-secondary mb-3">
-                  {selectedLocation.name}
+                  {selectedStore.nombre}
                 </h3>
                 <div className="space-y-3 text-neutral-600">
                   <p className="flex items-start gap-3">
@@ -428,45 +374,49 @@ export default function GoogleMap() {
                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                       />
                     </svg>
-                    {selectedLocation.address}
+                    {selectedStore.direccion}
                   </p>
-                  <p className="flex items-center gap-3">
-                    <svg
-                      className="w-5 h-5 text-primary shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                      />
-                    </svg>
-                    {selectedLocation.phone}
-                  </p>
-                  <p className="flex items-center gap-3">
-                    <svg
-                      className="w-5 h-5 text-primary shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    {selectedLocation.hours}
-                  </p>
+                  {selectedStore.telefono && (
+                    <p className="flex items-center gap-3">
+                      <svg
+                        className="w-5 h-5 text-primary shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                        />
+                      </svg>
+                      {selectedStore.telefono}
+                    </p>
+                  )}
+                  {selectedStore.horario && (
+                    <p className="flex items-center gap-3">
+                      <svg
+                        className="w-5 h-5 text-primary shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      {selectedStore.horario}
+                    </p>
+                  )}
                 </div>
                 <Button
                   variant="secondary"
                   size="md"
-                  href={`https://www.google.com/maps/dir/?api=1&destination=${selectedLocation.lat},${selectedLocation.lng}`}
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${selectedStore.lat},${selectedStore.lng}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-4 w-full"
@@ -482,29 +432,29 @@ export default function GoogleMap() {
               </div>
             )}
 
-            {/* Quick Location List */}
+            {/* Quick Store List */}
             <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 max-h-[300px] overflow-y-auto">
               <h4 className="text-white font-display text-lg mb-3">
                 Todas las tiendas
               </h4>
               <div className="space-y-2">
-                {locations.map((location) => (
+                {stores.map((store) => (
                   <button
-                    key={location.id}
+                    key={store.id}
                     onClick={() => {
-                      setSelectedLocation(location);
-                      map?.panTo({ lat: location.lat, lng: location.lng });
+                      setSelectedStore(store);
+                      map?.panTo({ lat: store.lat, lng: store.lng });
                       map?.setZoom(15);
                     }}
                     className={`w-full text-left p-3 rounded transition-colors ${
-                      selectedLocation?.id === location.id
+                      selectedStore?.id === store.id
                         ? "bg-primary text-secondary-dark"
                         : "bg-white/10 text-white hover:bg-white/20"
                     }`}
                   >
-                    <span className="font-display">{location.name}</span>
+                    <span className="font-display">{store.nombre}</span>
                     <span className="block text-sm opacity-75">
-                      {location.address}
+                      {store.direccion}
                     </span>
                   </button>
                 ))}
@@ -515,7 +465,7 @@ export default function GoogleMap() {
             <Button
               variant="primary-flat"
               size="lg"
-              href="/tiendas"
+              href="/sucursales"
               className="w-full rounded-lg"
             >
               Ver Todas las Tiendas
