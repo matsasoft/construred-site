@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
-  stores,
   type Store,
+  MUNICIPIO_LABELS,
   DEFAULT_CENTER,
   haversineDistance,
 } from "../data/stores";
@@ -23,7 +23,7 @@ function roundUpToOption(km: number): number {
 // =====================
 // Main Component
 // =====================
-export default function StoreFinder() {
+export default function StoreFinder({ stores }: { stores: Store[] }) {
   // ----- state -----
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
@@ -56,7 +56,7 @@ export default function StoreFinder() {
         distance: haversineDistance(center.lat, center.lng, s.lat, s.lng),
       }))
       .sort((a, b) => a.distance - b.distance);
-  }, [userLocation]);
+  }, [userLocation, stores]);
 
   // ----- derived: radius center (centroid of selected city or user location) -----
   const radiusCenter = useMemo(() => {
@@ -66,7 +66,7 @@ export default function StoreFinder() {
       lat: cityStores.reduce((sum, s) => sum + s.lat, 0) / cityStores.length,
       lng: cityStores.reduce((sum, s) => sum + s.lng, 0) / cityStores.length,
     };
-  }, [filterMunicipio, userLocation]);
+  }, [filterMunicipio, userLocation, stores]);
 
   // ----- derived: filtered stores -----
   const filteredStores = useMemo(() => {
@@ -90,8 +90,7 @@ export default function StoreFinder() {
       result = result.filter(
         (s) =>
           s.nombre.toLowerCase().includes(q) ||
-          s.calle.toLowerCase().includes(q) ||
-          s.colonia.toLowerCase().includes(q) ||
+          s.direccion.toLowerCase().includes(q) ||
           s.municipio.toLowerCase().includes(q),
       );
     }
@@ -380,7 +379,7 @@ export default function StoreFinder() {
         map.fitBounds(bounds, { top: 80, right: 20, bottom: 20, left: 20 });
       }
     },
-    [userLocation],
+    [userLocation, stores],
   );
 
   const centerOnUser = useCallback(() => {
@@ -470,7 +469,7 @@ export default function StoreFinder() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar sucursal por nombre, colonia o ciudad..."
+                placeholder="Buscar sucursal por nombre, dirección o ciudad..."
                 className="flex-1 py-3.5 px-2 text-neutral-800 placeholder-neutral-400 outline-none font-body text-sm md:text-base"
               />
               {searchQuery && (
@@ -690,16 +689,17 @@ export default function StoreFinder() {
                   </div>
                   <div>
                     <p className="text-neutral-800 text-sm font-medium">
-                      {selectedStore.calle}
+                      {selectedStore.direccion}
                     </p>
                     <p className="text-neutral-500 text-sm">
-                      Col. {selectedStore.colonia}, {selectedStore.municipio},{" "}
+                      {MUNICIPIO_LABELS[selectedStore.municipio] ?? selectedStore.municipio},{" "}
                       {selectedStore.estado}
                     </p>
                   </div>
                 </div>
 
                 {/* Phone */}
+                {selectedStore.telefono && (
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 bg-primary/20 flex items-center justify-center shrink-0 rounded">
                     <svg
@@ -723,8 +723,10 @@ export default function StoreFinder() {
                     {selectedStore.telefono}
                   </a>
                 </div>
+                )}
 
                 {/* Hours */}
+                {selectedStore.horario && (
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 bg-primary/20 flex items-center justify-center shrink-0 rounded">
                     <svg
@@ -745,6 +747,7 @@ export default function StoreFinder() {
                     {selectedStore.horario}
                   </p>
                 </div>
+                )}
 
                 {/* Correo */}
                 {selectedStore.correo && (
@@ -806,7 +809,7 @@ export default function StoreFinder() {
                     >
                       Cotizar por Correo
                     </Button>
-                  ) : (
+                  ) : selectedStore.telefono ? (
                     <Button
                       variant="outline"
                       size="sm"
@@ -815,7 +818,7 @@ export default function StoreFinder() {
                     >
                       Llamar
                     </Button>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -842,21 +845,20 @@ export default function StoreFinder() {
               </div>
             </div>
 
-            {/* Municipio Filter Tabs */}
-            <div className="flex gap-2 flex-wrap">
-              {["todos", "Chihuahua", "Cuauhtémoc", "Delicias"].map((m) => (
-                <button
-                  key={m}
-                  onClick={() => handleCityFilter(m)}
-                  className={`px-4 py-2 rounded font-display tracking-wider text-sm uppercase transition-all duration-300 border-2 ${
-                    filterMunicipio === m
-                      ? "bg-primary text-secondary border-primary shadow-industrial-sm"
-                      : "bg-transparent text-secondary border-secondary/30 hover:border-secondary hover:bg-secondary/5"
-                  }`}
-                >
-                  {m === "todos" ? "Todas" : m}
-                </button>
-              ))}
+            {/* Municipio Filter Dropdown */}
+            <div>
+              <select
+                value={filterMunicipio}
+                onChange={(e) => handleCityFilter(e.target.value)}
+                className="px-4 py-2.5 rounded font-display tracking-wider text-sm uppercase transition-all duration-300 border-2 border-secondary/30 bg-white text-secondary cursor-pointer outline-none focus:border-primary hover:border-secondary"
+              >
+                <option value="todos">Todas las ciudades</option>
+                {[...new Set(stores.map((s) => s.municipio))].sort().map((m) => (
+                  <option key={m} value={m}>
+                    {MUNICIPIO_LABELS[m] ?? m}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -963,7 +965,7 @@ export default function StoreFinder() {
 
           {/* Image */}
           <img
-            src={selectedStore.imagen}
+            src={selectedStore.imagenFull ?? selectedStore.imagen}
             alt={selectedStore.nombre}
             className="relative z-[1] max-w-[90vw] max-h-[85vh] object-contain rounded-lg shadow-2xl animate-[modalIn_300ms_ease-out_forwards]"
           />
@@ -1022,7 +1024,7 @@ function StoreCard({
         {/* City badge */}
         <div className="absolute bottom-3 left-3">
           <span className="bg-primary text-secondary-dark text-xs font-display tracking-wider px-2.5 py-1 rounded">
-            {store.municipio}
+            {MUNICIPIO_LABELS[store.municipio] ?? store.municipio}
           </span>
         </div>
       </div>
@@ -1032,8 +1034,8 @@ function StoreCard({
         <h3 className="font-display text-lg text-secondary tracking-wider mb-2 group-hover:text-primary transition-colors">
           {store.nombre}
         </h3>
-        <p className="text-neutral-500 text-sm mb-1 font-body">
-          {store.calle}, Col. {store.colonia}
+        <p className="text-neutral-500 text-sm mb-1 font-body line-clamp-2">
+          {store.direccion}
         </p>
         <div className="flex items-center gap-2 text-neutral-400 text-xs mt-3 font-body">
           <svg
@@ -1075,10 +1077,10 @@ function FallbackStoreCard({ store }: { store: Store }) {
           {store.nombre}
         </h3>
         <p className="text-neutral-500 text-sm">
-          {store.calle}, Col. {store.colonia}
+          {store.direccion}
         </p>
         <p className="text-neutral-400 text-xs mt-1">
-          {store.municipio}, {store.estado}
+          {MUNICIPIO_LABELS[store.municipio] ?? store.municipio}, {store.estado}
         </p>
         <div className="flex items-center gap-2 text-neutral-400 text-xs mt-3">
           <svg
@@ -1096,9 +1098,11 @@ function FallbackStoreCard({ store }: { store: Store }) {
           </svg>
           {store.horario}
         </div>
+        {store.telefono && (
         <p className="text-primary text-sm mt-2 font-medium">
           {store.telefono}
         </p>
+        )}
       </div>
     </div>
   );
