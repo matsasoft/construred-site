@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import Button from "./Button";
 
 interface FormData {
@@ -35,6 +35,30 @@ export default function ContactForm({ cmsApiUrl }: ContactFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const [geoResolved, setGeoResolved] = useState(false);
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setGeoResolved(true);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+        setGeoResolved(true);
+      },
+      () => {
+        setGeoResolved(true);
+      },
+    );
+  }, []);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -51,6 +75,11 @@ export default function ContactForm({ cmsApiUrl }: ContactFormProps) {
 
     if (!formData.mensaje.trim()) {
       newErrors.mensaje = "El mensaje es requerido";
+    }
+
+    if (!userLocation && !formData.codigoPostal.trim()) {
+      newErrors.codigoPostal =
+        "El código postal es requerido para ubicar tu tienda más cercana";
     }
 
     setErrors(newErrors);
@@ -90,6 +119,8 @@ export default function ContactForm({ cmsApiUrl }: ContactFormProps) {
           asunto: formData.asunto || undefined,
           mensaje: formData.mensaje,
           honeypot: formData.website,
+          userLat: userLocation?.lat,
+          userLng: userLocation?.lng,
         }),
       });
 
@@ -279,7 +310,10 @@ export default function ContactForm({ cmsApiUrl }: ContactFormProps) {
                     htmlFor="codigoPostal"
                     className="block text-sm font-display text-secondary mb-1 tracking-wider"
                   >
-                    C.P.
+                    C.P.{" "}
+                    {geoResolved && !userLocation && (
+                      <span className="text-accent">*</span>
+                    )}
                   </label>
                   <input
                     type="text"
@@ -292,6 +326,11 @@ export default function ContactForm({ cmsApiUrl }: ContactFormProps) {
                     maxLength={5}
                     inputMode="numeric"
                   />
+                  {errors.codigoPostal && (
+                    <p className="mt-1.5 text-sm text-accent">
+                      {errors.codigoPostal}
+                    </p>
+                  )}
                 </div>
               </div>
 
