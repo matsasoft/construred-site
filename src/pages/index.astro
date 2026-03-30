@@ -25,7 +25,7 @@ const stores = await fetchStores();
 		<GoogleMap client:visible stores={stores} />
 
 		<!-- Contact Form Section -->
-		<ContactForm client:visible />
+		<ContactForm client:visible cmsApiUrl={import.meta.env.PUBLIC_CMS_API_URL} />
 	</main>
 
 	<Footer />

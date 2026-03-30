@@ -1,4 +1,9 @@
 miconstrured.cloud {
+    # Rebuild webhook — proxy to rebuild server
+    handle /api/rebuild {
+        reverse_proxy localhost:9090
+    }
+
     root * /var/www/construred
     file_server
 
@@ -42,4 +47,25 @@ miconstrured.cloud {
 # Redirigir www a la versión sin www
 www.miconstrured.cloud {
     redir https://miconstrured.cloud{uri} permanent
+}
+
+# CMS Admin Panel
+admin.miconstrured.cloud {
+    reverse_proxy localhost:3000
+
+    # Headers de seguridad
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options SAMEORIGIN
+        Referrer-Policy strict-origin-when-cross-origin
+        Permissions-Policy "camera=(), microphone=()"
+        -Server
+    }
+
+    log {
+        output file /var/log/caddy/construred-admin-access.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+    }
 }

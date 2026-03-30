@@ -9,13 +9,18 @@ interface FormData {
   codigoPostal: string;
   asunto: string;
   mensaje: string;
+  website: string;
 }
 
 interface FormErrors {
   [key: string]: string;
 }
 
-export default function ContactForm() {
+interface ContactFormProps {
+  cmsApiUrl: string;
+}
+
+export default function ContactForm({ cmsApiUrl }: ContactFormProps) {
   const [formData, setFormData] = useState<FormData>({
     nombre: "",
     email: "",
@@ -24,10 +29,12 @@ export default function ContactForm() {
     codigoPostal: "",
     asunto: "",
     mensaje: "",
+    website: "",
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -68,23 +75,47 @@ export default function ContactForm() {
     if (!validateForm()) return;
 
     setIsSubmitting(true);
+    setErrorMessage("");
 
-    // Simulate form submission (UI only)
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const res = await fetch(`${cmsApiUrl}/api/contact-submissions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre: formData.nombre,
+          email: formData.email,
+          telefono: formData.telefono || undefined,
+          ciudad: formData.ciudad || undefined,
+          codigoPostal: formData.codigoPostal || undefined,
+          asunto: formData.asunto || undefined,
+          mensaje: formData.mensaje,
+          honeypot: formData.website,
+        }),
+      });
 
-    setIsSubmitting(false);
-    setIsSuccess(true);
-    setFormData({
-      nombre: "",
-      email: "",
-      telefono: "",
-      ciudad: "",
-      codigoPostal: "",
-      asunto: "",
-      mensaje: "",
-    });
+      if (!res.ok) throw new Error(`Status ${res.status}`);
 
-    setTimeout(() => setIsSuccess(false), 5000);
+      setIsSuccess(true);
+      setFormData({
+        nombre: "",
+        email: "",
+        telefono: "",
+        ciudad: "",
+        codigoPostal: "",
+        asunto: "",
+        mensaje: "",
+        website: "",
+      });
+      setTimeout(() => setIsSuccess(false), 5000);
+    } catch (error) {
+      console.error("Contact form submission failed:", error);
+      setErrorMessage(
+        "Hubo un error al enviar tu mensaje. Por favor, intenta de nuevo.",
+      );
+      setTimeout(() => setErrorMessage(""), 5000);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const inputClasses = (fieldName: string) => `
@@ -141,7 +172,26 @@ export default function ContactForm() {
               </div>
             )}
 
+            {errorMessage && (
+              <div className="mb-8 p-5 bg-red-50 border-l-4 border-accent text-red-700 rounded-r-lg animate-fade-in-up">
+                <p className="font-display text-lg">Error</p>
+                <p className="text-sm mt-1">{errorMessage}</p>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Honeypot — hidden from humans */}
+              <input
+                type="text"
+                name="website"
+                value={formData.website}
+                onChange={handleChange}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                className="absolute opacity-0 h-0 w-0 overflow-hidden pointer-events-none"
+              />
+
               {/* Nombre — full width */}
               <div>
                 <label
