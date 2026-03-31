@@ -60,7 +60,7 @@ export default function HeroSlider() {
     }, [nextSlide]);
 
     return (
-        <section id="inicio" className="relative h-screen min-h-[600px] overflow-hidden">
+        <section id="inicio" className="relative h-screen min-h-[600px] overflow-hidden pt-20">
             {/* Slides */}
             {slides.map((slide, index) => (
                 <div

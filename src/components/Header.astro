@@ -2,23 +2,31 @@
 import MobileMenu from "./MobileMenu.tsx";
 import Button from "./Button.astro";
 
+const currentPath = Astro.url.pathname;
+
 const navItems = [
-    { label: "Inicio", href: "#inicio" },
-    { label: "Nosotros", href: "#nosotros" },
-    { label: "Ubicaciones", href: "#ubicaciones" },
-    { label: "Contacto", href: "#contacto" },
+    { label: "Inicio", href: "/#inicio" },
+    { label: "Nosotros", href: "/#nosotros" },
+    { label: "Ubicaciones", href: "/sucursales" },
+    { label: "Contacto", href: "/#contacto" },
 ];
+
+function isActive(href: string, currentPath: string): boolean {
+    if (href === "/sucursales") return currentPath === "/sucursales" || currentPath === "/sucursales/";
+    if (href.startsWith("/#")) return currentPath === "/" || currentPath === "";
+    return false;
+}
 ---
 
 <header
     id="header"
-    class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+    class="fixed top-0 left-0 right-0 z-50 bg-white transition-shadow duration-300"
 >
     <div class="container mx-auto px-4 lg:px-8">
         <div class="flex items-center justify-between h-20">
             <!-- Logo -->
             <a
-                href="#inicio"
+                href="/"
                 class="relative z-50 flex items-center gap-3 group"
             >
                 <img
@@ -31,15 +39,26 @@ const navItems = [
             <!-- Desktop Navigation -->
             <nav class="hidden lg:flex items-center gap-8">
                 {
-                    navItems.map((item) => (
-                        <a
-                            href={item.href}
-                            class="nav-link font-display text-lg tracking-wider text-white hover:text-primary transition-colors duration-300 relative group drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]"
-                        >
-                            {item.label}
-                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
-                        </a>
-                    ))
+                    navItems.map((item) => {
+                        const active = isActive(item.href, currentPath);
+                        return (
+                            <a
+                                href={item.href}
+                                class:list={[
+                                    "nav-link font-display text-lg tracking-wider transition-colors duration-300 relative group",
+                                    active ? "text-primary" : "text-secondary hover:text-primary",
+                                ]}
+                            >
+                                {item.label}
+                                <span
+                                    class:list={[
+                                        "absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300",
+                                        active ? "w-full" : "w-0 group-hover:w-full",
+                                    ]}
+                                />
+                            </a>
+                        );
+                    })
                 }
             </nav>
 
@@ -47,14 +66,14 @@ const navItems = [
             <Button
                 variant="primary"
                 size="sm"
-                href="#contacto"
+                href="/sucursales"
                 class="hidden lg:inline-flex px-6 py-2.5"
             >
-                Cotizar
+                Buscar Tienda
             </Button>
 
             <!-- Mobile Menu -->
-            <MobileMenu client:load items={navItems} />
+            <MobileMenu client:load items={navItems} currentPath={currentPath} />
         </div>
     </div>
 
@@ -69,8 +88,6 @@ const navItems = [
 <script>
     const header = document.getElementById("header");
     const headerBorder = document.getElementById("header-border");
-    const navLinks = document.querySelectorAll(".nav-link");
-    const mobileMenuBtn = document.querySelector("[data-mobile-menu-btn]");
     let lastScrollY = 0;
 
     function updateHeader() {
@@ -78,52 +95,14 @@ const navItems = [
         const isScrolled = scrollY > 50;
 
         if (isScrolled) {
-            // Header con fondo blanco
-            header?.classList.add(
-                "bg-white/95",
-                "backdrop-blur-md",
-                "shadow-lg",
-            );
-            header?.classList.remove("bg-transparent");
-            headerBorder?.classList.add("opacity-100");
-            headerBorder?.classList.remove("opacity-0");
-
-            // Links oscuros sobre fondo blanco
-            navLinks.forEach((link) => {
-                link.classList.remove(
-                    "text-white",
-                    "drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]",
-                );
-                link.classList.add("text-secondary");
-            });
-
-            // Actualizar color del hamburger menu
-            header?.setAttribute("data-scrolled", "true");
+            header?.classList.add("shadow-lg");
+            headerBorder?.classList.replace("opacity-0", "opacity-100");
         } else {
-            // Header transparente sobre hero
-            header?.classList.remove(
-                "bg-white/95",
-                "backdrop-blur-md",
-                "shadow-lg",
-            );
-            header?.classList.add("bg-transparent");
-            headerBorder?.classList.remove("opacity-100");
-            headerBorder?.classList.add("opacity-0");
-
-            // Links blancos sobre hero oscuro
-            navLinks.forEach((link) => {
-                link.classList.remove("text-secondary");
-                link.classList.add(
-                    "text-white",
-                    "drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]",
-                );
-            });
-
-            // Actualizar color del hamburger menu
-            header?.setAttribute("data-scrolled", "false");
+            header?.classList.remove("shadow-lg");
+            headerBorder?.classList.replace("opacity-100", "opacity-0");
         }
 
-        // Hide header on scroll down, show on scroll up
+        // Hide on scroll down, show on scroll up
         if (scrollY > lastScrollY && scrollY > 200) {
             header?.classList.add("-translate-y-full");
         } else {
@@ -131,11 +110,6 @@ const navItems = [
         }
 
         lastScrollY = scrollY;
-
-        // Dispatch custom event for React components
-        window.dispatchEvent(
-            new CustomEvent("headerScrollChange", { detail: { isScrolled } }),
-        );
     }
 
     window.addEventListener("scroll", updateHeader, { passive: true });

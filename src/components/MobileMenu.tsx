@@ -8,23 +8,11 @@ interface NavItem {
 
 interface MobileMenuProps {
     items: NavItem[];
+    currentPath?: string;
 }
 
-export default function MobileMenu({ items }: MobileMenuProps) {
+export default function MobileMenu({ items, currentPath = '/' }: MobileMenuProps) {
     const [isOpen, setIsOpen] = useState(false);
-    const [isScrolled, setIsScrolled] = useState(false);
-
-    // Listen to scroll changes from header
-    useEffect(() => {
-        const handleScrollChange = (event: CustomEvent<{ isScrolled: boolean }>) => {
-            setIsScrolled(event.detail.isScrolled);
-        };
-
-        window.addEventListener('headerScrollChange', handleScrollChange as EventListener);
-        return () => {
-            window.removeEventListener('headerScrollChange', handleScrollChange as EventListener);
-        };
-    }, []);
 
     useEffect(() => {
         if (isOpen) {
@@ -41,15 +29,14 @@ export default function MobileMenu({ items }: MobileMenuProps) {
         setIsOpen(false);
     };
 
-    // Dynamic color based on scroll state
-    const hamburgerColor = isOpen ? 'text-white' : (isScrolled ? 'text-secondary' : 'text-white');
+    const hamburgerColor = isOpen ? 'text-white' : 'text-secondary';
 
     return (
         <>
             {/* Hamburger Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`lg:hidden relative z-50 w-10 h-10 flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-colors duration-300 ${hamburgerColor} ${!isScrolled && !isOpen ? 'drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]' : ''}`}
+                className={`lg:hidden relative z-50 w-10 h-10 flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-colors duration-300 ${hamburgerColor}`}
                 aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
                 aria-expanded={isOpen}
                 data-mobile-menu-btn
@@ -103,7 +90,11 @@ export default function MobileMenu({ items }: MobileMenuProps) {
                                 <a
                                     href={item.href}
                                     onClick={handleLinkClick}
-                                    className="text-4xl md:text-5xl font-display text-white hover:text-primary transition-colors duration-300 tracking-wider"
+                                    className={`text-4xl md:text-5xl font-display transition-colors duration-300 tracking-wider ${
+                                        (item.href === '/sucursales' && (currentPath === '/sucursales' || currentPath === '/sucursales/'))
+                                            ? 'text-primary'
+                                            : 'text-white hover:text-primary'
+                                    }`}
                                 >
                                     {item.label}
                                 </a>
@@ -122,8 +113,8 @@ export default function MobileMenu({ items }: MobileMenuProps) {
                             transitionDelay: isOpen ? `${items.length * 100}ms` : '0ms'
                         }}
                     >
-                        <Button variant="primary" size="lg" href="#contacto" onClick={handleLinkClick} className="text-xl">
-                            Cotiza Ahora
+                        <Button variant="primary" size="lg" href="/sucursales" onClick={handleLinkClick} className="text-xl">
+                            Buscar Tienda
                         </Button>
                     </div>
                 </nav>
