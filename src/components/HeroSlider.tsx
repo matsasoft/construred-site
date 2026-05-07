@@ -143,14 +143,15 @@ export default function HeroSlider() {
                     ))}
                 </div>
 
-                {/* Meny Mascot */}
-                <div className="hidden lg:block absolute right-8 bottom-8 w-64 h-64 opacity-90">
-                    <img
-                        src="/Meny-01.png"
-                        alt="Meny - Mascota de Construred"
-                        className="w-full h-full object-contain drop-shadow-2xl animate-[bounce_3s_ease-in-out_infinite]"
-                    />
-                </div>
+            </div>
+
+            {/* Meny Mascot */}
+            <div className="hidden lg:block absolute right-0 bottom-0 w-64 h-64 opacity-90">
+                <img
+                    src="/Meny-01.png"
+                    alt="Meny - Mascota de Construred"
+                    className="w-full h-full object-contain drop-shadow-2xl animate-[bounce_3s_ease-in-out_infinite]"
+                />
             </div>
 
             {/* Slide Navigation */}
