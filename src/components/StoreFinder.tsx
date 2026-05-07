@@ -338,6 +338,7 @@ export default function StoreFinder({ stores }: { stores: Store[] }) {
   const handleCityFilter = useCallback(
     (municipio: string) => {
       setFilterMunicipio(municipio);
+      setSearchQuery("");
       const map = mapInstanceRef.current;
       if (!map || !window.google) return;
 
@@ -994,10 +995,11 @@ function StoreCard({
       onClick={onSelect}
       className={`
         group text-left w-full rounded-lg overflow-hidden
+        flex flex-col
         transition-all duration-300
         hover:-translate-y-1 hover:shadow-xl
-        border-2 bg-white
-        ${isSelected ? "border-primary shadow-industrial-sm" : "border-transparent shadow-md hover:border-primary/40"}
+        bg-white
+        ${isSelected ? "ring-2 ring-primary shadow-industrial-sm" : "shadow-md hover:ring-2 hover:ring-primary/40"}
         animate-fade-in-up
       `}
       style={{
@@ -1030,7 +1032,7 @@ function StoreCard({
       </div>
 
       {/* Content */}
-      <div className="p-4">
+      <div className="p-4 flex-1">
         <h3 className="font-display text-lg text-secondary tracking-wider mb-2 group-hover:text-primary transition-colors">
           {store.nombre}
         </h3>
