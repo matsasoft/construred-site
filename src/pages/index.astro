@@ -7,8 +7,12 @@ import GoogleMap from '../components/GoogleMap.tsx';
 import ContactForm from '../components/ContactForm.tsx';
 import Footer from '../components/Footer.astro';
 import { fetchStores } from '../data/stores';
+import { fetchHeroSlides } from '../data/heroSlides';
 
-const stores = await fetchStores();
+const [stores, heroSlides] = await Promise.all([
+	fetchStores(),
+	fetchHeroSlides(),
+]);
 ---
 
 <Layout>
@@ -16,7 +20,7 @@ const stores = await fetchStores();
 
 	<main>
 		<!-- Hero Section with Slider -->
-		<HeroSlider client:load />
+		{heroSlides.length > 0 && <HeroSlider slides={heroSlides} client:load />}
 
 		<!-- About Section -->
 		<AboutSection />

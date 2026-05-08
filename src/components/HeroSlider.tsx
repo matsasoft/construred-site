@@ -1,51 +1,30 @@
 import { useState, useEffect, useCallback } from 'react';
 import Button from './Button';
+import type { HeroSlide } from '../data/heroSlides';
 
-interface Slide {
-    id: number;
-    image: string;
-    title: string;
-    subtitle: string;
+interface HeroSliderProps {
+    slides: HeroSlide[];
 }
 
-const slides: Slide[] = [
-    {
-        id: 1,
-        image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&q=80',
-        title: 'Todo para tu construcción',
-        subtitle: 'Material eléctrico, plomería y construcción en un solo lugar'
-    },
-    {
-        id: 2,
-        image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1920&q=80',
-        title: 'Los mejores precios',
-        subtitle: 'Cotiza con nosotros y obtén el mejor precio del mercado'
-    },
-    {
-        id: 3,
-        image: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=1920&q=80',
-        title: 'Atención personalizada',
-        subtitle: 'Nuestro equipo de expertos te asesora en tu proyecto'
-    }
-];
-
-export default function HeroSlider() {
+export default function HeroSlider({ slides }: HeroSliderProps) {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
 
+    const slideCount = slides.length;
+
     const nextSlide = useCallback(() => {
-        if (isAnimating) return;
+        if (isAnimating || slideCount <= 1) return;
         setIsAnimating(true);
-        setCurrentSlide((prev) => (prev + 1) % slides.length);
+        setCurrentSlide((prev) => (prev + 1) % slideCount);
         setTimeout(() => setIsAnimating(false), 700);
-    }, [isAnimating]);
+    }, [isAnimating, slideCount]);
 
     const prevSlide = useCallback(() => {
-        if (isAnimating) return;
+        if (isAnimating || slideCount <= 1) return;
         setIsAnimating(true);
-        setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+        setCurrentSlide((prev) => (prev - 1 + slideCount) % slideCount);
         setTimeout(() => setIsAnimating(false), 700);
-    }, [isAnimating]);
+    }, [isAnimating, slideCount]);
 
     const goToSlide = (index: number) => {
         if (isAnimating || index === currentSlide) return;
@@ -55,9 +34,10 @@ export default function HeroSlider() {
     };
 
     useEffect(() => {
+        if (slideCount <= 1) return;
         const interval = setInterval(nextSlide, 6000);
         return () => clearInterval(interval);
-    }, [nextSlide]);
+    }, [nextSlide, slideCount]);
 
     return (
         <section id="inicio" className="relative h-screen min-h-[600px] overflow-hidden pt-20">
@@ -73,6 +53,8 @@ export default function HeroSlider() {
                 >
                     {/* Background Image */}
                     <div
+                        role="img"
+                        aria-label={slide.imageAlt}
                         className="absolute inset-0 bg-cover bg-center"
                         style={{ backgroundImage: `url(${slide.image})` }}
                     />
@@ -110,33 +92,48 @@ export default function HeroSlider() {
                                                 }}
                                             >
                                                 {word}
-                                                {i < slide.title.split(' ').length - 1 && '\u00A0'}
+                                                {i < slide.title.split(' ').length - 1 && ' '}
                                             </span>
                                         ))}
                                     </h1>
-                                    <p
-                                        className="text-xl md:text-2xl text-neutral-200 mb-8 max-w-xl animate-fade-in-up opacity-0"
-                                        style={{
-                                            animationDelay: '500ms',
-                                            animationFillMode: 'forwards'
-                                        }}
-                                    >
-                                        {slide.subtitle}
-                                    </p>
-                                    <div
-                                        className="flex flex-wrap gap-4 animate-fade-in-up opacity-0"
-                                        style={{
-                                            animationDelay: '700ms',
-                                            animationFillMode: 'forwards'
-                                        }}
-                                    >
-                                        <Button variant="primary" size="lg" href="#contacto" className="shadow-industrial hover:shadow-[6px_6px_0_0_var(--color-secondary),12px_12px_0_0_var(--color-primary-dark)] hover:-translate-y-1">
-                                            Cotizar Ahora
-                                        </Button>
-                                        <Button variant="ghost" size="lg" href="#nosotros">
-                                            Conocer Más
-                                        </Button>
-                                    </div>
+                                    {slide.subtitle && (
+                                        <p
+                                            className="text-xl md:text-2xl text-neutral-200 mb-8 max-w-xl animate-fade-in-up opacity-0"
+                                            style={{
+                                                animationDelay: '500ms',
+                                                animationFillMode: 'forwards'
+                                            }}
+                                        >
+                                            {slide.subtitle}
+                                        </p>
+                                    )}
+                                    {slide.buttons.length > 0 && (
+                                        <div
+                                            className="flex flex-wrap gap-4 animate-fade-in-up opacity-0"
+                                            style={{
+                                                animationDelay: '700ms',
+                                                animationFillMode: 'forwards'
+                                            }}
+                                        >
+                                            {slide.buttons.map((btn, btnIndex) => (
+                                                <Button
+                                                    key={btnIndex}
+                                                    variant={btn.variant}
+                                                    size="lg"
+                                                    href={btn.url}
+                                                    target={btn.openInNewTab ? '_blank' : undefined}
+                                                    rel={btn.openInNewTab ? 'noopener noreferrer' : undefined}
+                                                    className={
+                                                        btn.variant === 'primary'
+                                                            ? 'shadow-industrial hover:shadow-[6px_6px_0_0_var(--color-secondary),12px_12px_0_0_var(--color-primary-dark)] hover:-translate-y-1'
+                                                            : ''
+                                                    }
+                                                >
+                                                    {btn.label}
+                                                </Button>
+                                            ))}
+                                        </div>
+                                    )}
                                 </>
                             )}
                         </div>
@@ -155,50 +152,56 @@ export default function HeroSlider() {
             </div>
 
             {/* Slide Navigation */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4">
-                {slides.map((_, index) => (
-                    <button
-                        key={index}
-                        onClick={() => goToSlide(index)}
-                        className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                            index === currentSlide
-                                ? 'bg-primary w-12'
-                                : 'bg-white/50 hover:bg-white/80'
-                        }`}
-                        aria-label={`Ir a slide ${index + 1}`}
-                    />
-                ))}
-            </div>
+            {slideCount > 1 && (
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4">
+                    {slides.map((_, index) => (
+                        <button
+                            key={index}
+                            onClick={() => goToSlide(index)}
+                            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                                index === currentSlide
+                                    ? 'bg-primary w-12'
+                                    : 'bg-white/50 hover:bg-white/80'
+                            }`}
+                            aria-label={`Ir a slide ${index + 1}`}
+                        />
+                    ))}
+                </div>
+            )}
 
             {/* Arrow Navigation */}
-            <button
-                onClick={prevSlide}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-primary hover:text-secondary-dark transition-all duration-300 group"
-                aria-label="Slide anterior"
-            >
-                <svg
-                    className="w-6 h-6 transition-transform duration-300 group-hover:-translate-x-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-            </button>
-            <button
-                onClick={nextSlide}
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-primary hover:text-secondary-dark transition-all duration-300 group"
-                aria-label="Siguiente slide"
-            >
-                <svg
-                    className="w-6 h-6 transition-transform duration-300 group-hover:translate-x-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-            </button>
+            {slideCount > 1 && (
+                <>
+                    <button
+                        onClick={prevSlide}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-primary hover:text-secondary-dark transition-all duration-300 group"
+                        aria-label="Slide anterior"
+                    >
+                        <svg
+                            className="w-6 h-6 transition-transform duration-300 group-hover:-translate-x-1"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <button
+                        onClick={nextSlide}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-primary hover:text-secondary-dark transition-all duration-300 group"
+                        aria-label="Siguiente slide"
+                    >
+                        <svg
+                            className="w-6 h-6 transition-transform duration-300 group-hover:translate-x-1"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </>
+            )}
 
             {/* Scroll Indicator */}
             <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/80">
