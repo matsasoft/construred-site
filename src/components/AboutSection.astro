@@ -1,37 +1,39 @@
 ---
 import SectionTitle from './SectionTitle.astro';
+import type { AboutSectionData, CardAccent, CardIcon } from '../data/aboutSection';
 
-const cards = [
-    {
-        icon: `<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>`,
-        title: 'Quiénes Somos',
-        description: 'En Construred, encuentras todo el material eléctrico, de construcción y plomería para tus proyectos. En nuestras ferreterías encontrarás todo el material de construcción que necesitas para tus proyectos de remodelación y reparación, y siempre contarás con la mejor atención personalizada.',
-        accent: 'primary'
-    },
-    {
-        icon: `<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>`,
-        title: 'Nuestra Misión',
-        description: 'Atender y solucionar en forma integral y efectiva las necesidades de construcción del público en general, ferreteros, transformistas, industria de la construcción y Gobierno, contando con una amplia gama de productos, una infraestructura funcional y moderna con colaboradores profesionales, para garantizar su plena satisfacción.',
-        accent: 'secondary'
-    },
-    {
-        icon: `<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>`,
-        title: 'Política de Calidad',
-        description: 'Atención personalizada a nuestros clientes ayudándoles a definir sus necesidades, ofreciéndoles oportunamente la mejor opción. En ConstruRed estamos comprometidos con nuestros clientes, por lo que siempre serás atendido con amabilidad, eficiencia y rapidez.',
-        accent: 'accent'
-    }
-];
+interface Props {
+    data: AboutSectionData;
+}
 
-const accentColors = {
-    primary: 'bg-primary text-secondary-dark',
-    secondary: 'bg-secondary text-white',
-    accent: 'bg-accent text-white'
+const { data } = Astro.props;
+
+const iconMap: Record<CardIcon, string> = {
+    building: `<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>`,
+    lightning: `<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>`,
+    shield: `<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>`,
+    hammer: `<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 7l-1.5-1.5a2 2 0 00-2.83 0L4 11.17a2 2 0 000 2.83L5.5 15.5m8.5-8.5l5 5m-5-5l2-2a2 2 0 012.83 0l2.17 2.17a2 2 0 010 2.83l-2 2m-5-5l-3 3M5.5 15.5L3 18l3 3 2.5-2.5m-3-3l3 3"/></svg>`,
+    helmet: `<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 17h16v2H4v-2zm2-2a6 6 0 0112 0H6zm4-9h4v3h-4V6z"/></svg>`,
+    tools: `<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>`,
 };
 
-const borderColors = {
+const accentColors: Record<CardAccent, string> = {
+    primary: 'bg-primary text-secondary-dark',
+    secondary: 'bg-secondary text-white',
+    accent: 'bg-accent text-white',
+};
+
+const borderColors: Record<CardAccent, string> = {
     primary: 'border-primary',
     secondary: 'border-secondary',
-    accent: 'border-accent'
+    accent: 'border-accent',
+};
+
+const statColorCycle: CardAccent[] = ['primary', 'secondary', 'accent'];
+const statTextColors: Record<CardAccent, string> = {
+    primary: 'text-primary',
+    secondary: 'text-secondary',
+    accent: 'text-accent',
 };
 ---
 
@@ -46,19 +48,19 @@ const borderColors = {
 
     <div class="container mx-auto px-4 lg:px-8 relative">
         <SectionTitle
-            title="Nosotros"
-            subtitle="Conoce más sobre Construred y nuestra pasión por servir"
+            title={data.sectionTitle}
+            subtitle={data.sectionSubtitle}
         />
 
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16">
-            {cards.map((card, index) => (
+            {data.cards.map((card, index) => (
                 <article
-                    class={`group relative bg-white p-8 transition-all duration-500 hover:-translate-y-2 border-b-4 ${borderColors[card.accent as keyof typeof borderColors]}`}
+                    class={`group relative bg-white p-8 transition-all duration-500 hover:-translate-y-2 border-b-4 ${borderColors[card.accent]}`}
                     style={`animation-delay: ${index * 150}ms`}
                 >
                     <!-- Icon Container -->
-                    <div class={`w-20 h-20 flex items-center justify-center mb-6 ${accentColors[card.accent as keyof typeof accentColors]} transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
-                        <Fragment set:html={card.icon} />
+                    <div class={`w-20 h-20 flex items-center justify-center mb-6 ${accentColors[card.accent]} transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
+                        <Fragment set:html={iconMap[card.icon] ?? iconMap.building} />
                     </div>
 
                     <!-- Content -->
@@ -70,7 +72,7 @@ const borderColors = {
                     </p>
 
                     <!-- Corner Accent -->
-                    <div class={`absolute top-0 right-0 w-16 h-16 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${accentColors[card.accent as keyof typeof accentColors]}`} style="clip-path: polygon(100% 0, 100% 100%, 0 0)"></div>
+                    <div class={`absolute top-0 right-0 w-16 h-16 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${accentColors[card.accent]}`} style="clip-path: polygon(100% 0, 100% 100%, 0 0)"></div>
 
                     <!-- Industrial Shadow Effect -->
                     <div class="absolute -bottom-2 -right-2 w-full h-full bg-neutral-200 -z-10 transition-all duration-500 group-hover:-bottom-3 group-hover:-right-3"></div>
@@ -80,22 +82,17 @@ const borderColors = {
 
         <!-- Stats Section -->
         <div class="mt-20 grid grid-cols-2 lg:grid-cols-4 gap-8">
-            <div class="text-center group">
-                <div class="text-5xl lg:text-6xl font-display text-primary mb-2 group-hover:scale-110 transition-transform duration-300">25+</div>
-                <div class="text-neutral-600 font-body">Años de experiencia</div>
-            </div>
-            <div class="text-center group">
-                <div class="text-5xl lg:text-6xl font-display text-secondary mb-2 group-hover:scale-110 transition-transform duration-300">50+</div>
-                <div class="text-neutral-600 font-body">Sucursales</div>
-            </div>
-            <div class="text-center group">
-                <div class="text-5xl lg:text-6xl font-display text-accent mb-2 group-hover:scale-110 transition-transform duration-300">10K+</div>
-                <div class="text-neutral-600 font-body">Productos disponibles</div>
-            </div>
-            <div class="text-center group">
-                <div class="text-5xl lg:text-6xl font-display text-primary mb-2 group-hover:scale-110 transition-transform duration-300">100%</div>
-                <div class="text-neutral-600 font-body">Compromiso</div>
-            </div>
+            {data.stats.map((stat, index) => {
+                const color = statColorCycle[index % statColorCycle.length];
+                return (
+                    <div class="text-center group">
+                        <div class={`text-5xl lg:text-6xl font-display ${statTextColors[color]} mb-2 group-hover:scale-110 transition-transform duration-300`}>
+                            {stat.value}
+                        </div>
+                        <div class="text-neutral-600 font-body">{stat.label}</div>
+                    </div>
+                );
+            })}
         </div>
 
     </div>
