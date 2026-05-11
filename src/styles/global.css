@@ -176,3 +176,40 @@ h1, h2, h3, h4, h5, h6 {
 .stagger-3 { animation-delay: 0.3s; }
 .stagger-4 { animation-delay: 0.4s; }
 .stagger-5 { animation-delay: 0.5s; }
+
+/* Rich text (legal pages) */
+.legal-richtext {
+    color: var(--color-neutral-700);
+    font-family: var(--font-body);
+    line-height: 1.7;
+}
+.legal-richtext h1,
+.legal-richtext h2,
+.legal-richtext h3,
+.legal-richtext h4 {
+    font-family: var(--font-display);
+    letter-spacing: 0.05em;
+    color: var(--color-secondary-dark);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+.legal-richtext h2 { font-size: 1.875rem; }
+.legal-richtext h3 { font-size: 1.5rem; }
+.legal-richtext h4 { font-size: 1.25rem; }
+.legal-richtext p { margin-bottom: 1rem; }
+.legal-richtext ul,
+.legal-richtext ol {
+    margin: 1rem 0 1rem 1.5rem;
+}
+.legal-richtext ul { list-style: disc; }
+.legal-richtext ol { list-style: decimal; }
+.legal-richtext li { margin-bottom: 0.5rem; }
+.legal-richtext a {
+    color: var(--color-secondary);
+    text-decoration: underline;
+}
+.legal-richtext a:hover {
+    color: var(--color-primary-dark);
+}
+.legal-richtext strong { font-weight: 700; color: var(--color-neutral-900); }
+.legal-richtext em { font-style: italic; }
