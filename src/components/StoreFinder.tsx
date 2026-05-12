@@ -26,6 +26,7 @@ function roundUpToOption(km: number): number {
 export default function StoreFinder({ stores }: { stores: Store[] }) {
   // ----- state -----
   const mapRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const circleRef = useRef<google.maps.Circle | null>(null);
@@ -333,6 +334,11 @@ export default function StoreFinder({ stores }: { stores: Store[] }) {
       map.panTo({ lat: store.lat, lng: store.lng });
       map.setZoom(14);
     }
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    sectionRef.current?.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "start",
+    });
   }, []);
 
   const handleCityFilter = useCallback(
@@ -428,7 +434,7 @@ export default function StoreFinder({ stores }: { stores: Store[] }) {
   return (
     <div className="relative min-h-screen bg-neutral-50">
       {/* ===== MAP HERO ===== */}
-      <section className="relative" style={{ height: "70vh" }}>
+      <section ref={sectionRef} className="relative" style={{ height: "70vh", scrollMarginTop: "5rem" }}>
         {/* Map Container */}
         <div
           ref={mapRef}
