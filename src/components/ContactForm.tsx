@@ -107,7 +107,7 @@ export default function ContactForm({ cmsApiUrl }: ContactFormProps) {
     setErrorMessage("");
 
     try {
-      const res = await fetch(`${cmsApiUrl}/api/contact-submissions`, {
+      const res = await fetch(`${cmsApiUrl.replace(/\/+$/, "")}/api/contact-submissions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
