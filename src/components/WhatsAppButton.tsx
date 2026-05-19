@@ -51,6 +51,9 @@ export default function WhatsAppButton({
                     setIsHovered(false);
                     setShowTooltip(false);
                 }}
+                onClick={() => {
+                    window.gtag?.('event', 'contact', { method: 'whatsapp' });
+                }}
                 aria-label="Contactar por WhatsApp"
             >
                 {/* Pulse Animation */}

@@ -126,6 +126,11 @@ export default function ContactForm({ cmsApiUrl }: ContactFormProps) {
 
       if (!res.ok) throw new Error(`Status ${res.status}`);
 
+      window.gtag?.("event", "generate_lead", {
+        form_name: "contacto",
+        asunto: formData.asunto || "(sin asunto)",
+      });
+
       setIsSuccess(true);
       setFormData({
         nombre: "",
