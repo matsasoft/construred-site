@@ -5,7 +5,6 @@ import HeroSlider from '../components/HeroSlider.tsx';
 import AboutSection from '../components/AboutSection.astro';
 import GoogleMap from '../components/GoogleMap.tsx';
 import ContactForm from '../components/ContactForm.tsx';
-import Footer from '../components/Footer.astro';
 import { fetchStores } from '../data/stores';
 import { fetchHeroSlides } from '../data/heroSlides';
 import { fetchAboutSection } from '../data/aboutSection';
@@ -33,7 +32,4 @@ const [stores, heroSlides, about] = await Promise.all([
 		<!-- Contact Form Section -->
 		<ContactForm client:visible cmsApiUrl={import.meta.env.PUBLIC_CMS_API_URL} />
 	</main>
-
-	<Footer />
-
 </Layout>

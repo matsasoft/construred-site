@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css';
+import Footer from '../components/Footer.astro';
+import { fetchFooterContent } from '../data/footerContent';
 
 interface Props {
 	title?: string;
@@ -12,6 +14,8 @@ const {
 	description = "En Construred encuentras todo el material eléctrico, de construcción y plomería para tus proyectos. La mejor atención personalizada y los mejores precios.",
 	image = "/CONSTRURED logo-01.png"
 } = Astro.props;
+
+const footer = await fetchFooterContent();
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://construred.mx');
 
@@ -110,5 +114,6 @@ const gaEnabled = import.meta.env.PROD && typeof gaId === 'string' && gaId.start
 	</head>
 	<body class="min-h-screen flex flex-col">
 		<slot />
+		<Footer data={footer} />
 	</body>
 </html>
