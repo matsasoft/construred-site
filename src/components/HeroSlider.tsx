@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Button from './Button';
 import type { HeroSlide } from '../data/heroSlides';
 
@@ -33,6 +33,28 @@ export default function HeroSlider({ slides }: HeroSliderProps) {
         setTimeout(() => setIsAnimating(false), 700);
     };
 
+    // Swipe-to-change (touch devices). Records the touch start point and, on
+    // release, fires the existing crossfade only for a horizontally-dominant
+    // gesture — so vertical page scrolling is never hijacked.
+    const touchStart = useRef<{ x: number; y: number } | null>(null);
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        const t = e.changedTouches[0];
+        touchStart.current = { x: t.clientX, y: t.clientY };
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        if (!touchStart.current) return;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - touchStart.current.x;
+        const dy = t.clientY - touchStart.current.y;
+        touchStart.current = null;
+        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+            if (dx < 0) nextSlide();
+            else prevSlide();
+        }
+    };
+
     useEffect(() => {
         if (slideCount <= 1) return;
         const interval = setInterval(nextSlide, 6000);
@@ -40,7 +62,12 @@ export default function HeroSlider({ slides }: HeroSliderProps) {
     }, [nextSlide, slideCount]);
 
     return (
-        <section id="inicio" className="relative h-screen min-h-[600px] overflow-hidden pt-20">
+        <section
+            id="inicio"
+            className="relative h-screen min-h-[600px] overflow-hidden pt-20"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+        >
             {/* Slides */}
             {slides.map((slide, index) => (
                 <div
@@ -174,7 +201,7 @@ export default function HeroSlider({ slides }: HeroSliderProps) {
                 <>
                     <button
                         onClick={prevSlide}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-primary hover:text-secondary-dark transition-all duration-300 group"
+                        className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 items-center justify-center bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-primary hover:text-secondary-dark transition-all duration-300 group"
                         aria-label="Slide anterior"
                     >
                         <svg
@@ -188,7 +215,7 @@ export default function HeroSlider({ slides }: HeroSliderProps) {
                     </button>
                     <button
                         onClick={nextSlide}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-primary hover:text-secondary-dark transition-all duration-300 group"
+                        className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 items-center justify-center bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-primary hover:text-secondary-dark transition-all duration-300 group"
                         aria-label="Siguiente slide"
                     >
                         <svg
