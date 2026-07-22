@@ -52,7 +52,7 @@ export default function WhatsAppButton({
                     setShowTooltip(false);
                 }}
                 onClick={() => {
-                    window.gtag?.('event', 'contact', { method: 'whatsapp' });
+                    window.dataLayer?.push({ event: 'contact', method: 'whatsapp' });
                 }}
                 aria-label="Contactar por WhatsApp"
             >

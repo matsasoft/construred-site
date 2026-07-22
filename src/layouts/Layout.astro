@@ -19,8 +19,8 @@ const footer = await fetchFooterContent();
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://construred.mx');
 
-const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
-const gaEnabled = import.meta.env.PROD && typeof gaId === 'string' && gaId.startsWith('G-');
+const gtmId = import.meta.env.PUBLIC_GTM_ID;
+const gtmEnabled = import.meta.env.PROD && typeof gtmId === 'string' && gtmId.startsWith('GTM-');
 ---
 
 <!doctype html>
@@ -28,6 +28,19 @@ const gaEnabled = import.meta.env.PROD && typeof gaId === 'string' && gaId.start
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		{gtmEnabled && (
+			<!-- Google Tag Manager -->
+			<script is:inline define:vars={{ gtmId }}>
+				(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+				new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+				j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+				'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+				})(window,document,'script','dataLayer',gtmId);
+			</script>
+			<!-- End Google Tag Manager -->
+		)}
+
 		<link rel="icon" type="image/png" href="/CONSTRURED_logo-500x500px.png" />
 		<link rel="apple-touch-icon" href="/CONSTRURED_logo-500x500px.png" />
 		<meta name="generator" content={Astro.generator} />
@@ -88,31 +101,16 @@ const gaEnabled = import.meta.env.PROD && typeof gaId === 'string' && gaId.start
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-		{gaEnabled && (
-			<>
-				<script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
-				<script is:inline define:vars={{ gaId }}>
-					window.dataLayer = window.dataLayer || [];
-					function gtag(){ dataLayer.push(arguments); }
-					window.gtag = gtag;
-					gtag('js', new Date());
-					gtag('config', gaId, { anonymize_ip: true });
-
-					document.addEventListener('click', (e) => {
-						const target = e.target;
-						if (!(target instanceof Element)) return;
-						const anchor = target.closest('a[href^="#"]');
-						if (!anchor) return;
-						const href = anchor.getAttribute('href') || '';
-						const section = href.slice(1);
-						if (!section) return;
-						gtag('event', 'anchor_click', { section });
-					});
-				</script>
-			</>
-		)}
 	</head>
 	<body class="min-h-screen flex flex-col">
+		{gtmEnabled && (
+			<!-- Google Tag Manager (noscript) -->
+			<noscript>
+				<iframe src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+					height="0" width="0" style="display:none;visibility:hidden"></iframe>
+			</noscript>
+			<!-- End Google Tag Manager (noscript) -->
+		)}
 		<slot />
 		<Footer data={footer} />
 	</body>
