@@ -3,12 +3,8 @@ import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import RichText from '../components/RichText.tsx';
 import { fetchTermsAndConditions } from '../data/termsAndConditions';
-import { fetchAvisoPdfUrl } from '../data/privacyPolicy';
 
-const [{ title, content }, avisoPdfUrl] = await Promise.all([
-  fetchTermsAndConditions(),
-  fetchAvisoPdfUrl(),
-]);
+const { title, content, terminosPdfUrl } = await fetchTermsAndConditions();
 ---
 
 <Layout
@@ -22,7 +18,7 @@ const [{ title, content }, avisoPdfUrl] = await Promise.all([
       <h1 class="font-display text-4xl md:text-5xl tracking-wider text-secondary-dark mb-10">
         {title}
       </h1>
-      <RichText client:load data={content} avisoPdfUrl={avisoPdfUrl} />
+      <RichText client:load data={content} terminosPdfUrl={terminosPdfUrl} />
     </article>
   </main>
 </Layout>
